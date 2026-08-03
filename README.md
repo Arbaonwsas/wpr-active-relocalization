@@ -81,3 +81,25 @@ ros2 topic echo /global_relocalization/quality
 2026-08-03 的首轮三位置基准测试全部恢复成功，平均墙钟恢复时长为
 186.49 秒。详细时长、真实位姿误差、原始状态日志和复测方法见
 [基准测试记录](benchmark_results/2026-08-03_baseline/README.md)。
+
+需要进行重复计时实验时，可在导航和 Gazebo 已启动后执行：
+
+```
+python3 scripts/benchmark_global_relocalization.py \
+  --repetitions 10 \
+  --output-dir benchmark_results/relocalization_repeat_10
+```
+
+可重复使用 `--location top_left_room`、`--location map_center` 或
+`--location bottom_right_area` 只选择部分位置。每次运行会生成：
+
+- `results.csv`：每次实验的总时间、各阶段累计时间、误差和成功状态；
+- `phase_timings.csv`：每次尝试中初始化、扫描、确认、平移、停车和清图的
+  起止墙钟/仿真时间；
+- `README.md`：分位置成功率、P50、P95、最大恢复时间、阶段耗时占比和实验
+  夹具开销；
+- `status_*.log`：带 `run_id` 和事件序号的原始状态事件，避免混入上一次
+  瞬态持久消息。
+
+算法阶段时间和暂停、传送、恢复 Gazebo、采集结果等实验夹具时间分开统计，
+因此后续优化时不会把测试脚本本身的等待误认为重定位耗时。

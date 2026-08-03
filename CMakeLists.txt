@@ -179,6 +179,9 @@ if(BUILD_TESTING)
   ament_add_pytest_test(test_relocalization_core
     test/test_relocalization_core.py
   )
+  ament_add_pytest_test(test_relocalization_benchmark
+    test/test_relocalization_benchmark.py
+  )
 endif()
 
 install(DIRECTORY config launch demo_launch worlds models meshes rviz src msg maps

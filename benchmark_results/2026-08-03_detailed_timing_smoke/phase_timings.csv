@@ -1,0 +1,8 @@
+location,trial,phase,occurrence,attempt,detail,start_wall_sec,end_wall_sec,duration_wall_sec,start_sim_sec,end_sim_sec,duration_sim_sec
+map_center,1,PREPARING,1,,canceling navigation and stopping robot,2.2e-05,0.503706,0.503684,0.0,0.5,0.5
+map_center,1,INITIALIZING,1,1,requesting AMCL global particle initialization,0.503706,0.523197,0.019491,0.5,0.5,0.0
+map_center,1,SCANNING,1,1,attempt 1/2,0.523197,11.323644,10.800447,0.5,11.3,10.8
+map_center,1,CONFIRMING,1,1,first acceptable AMCL update,11.323644,12.128119,0.804475,11.3,12.1,0.8
+map_center,1,STOPPING_ATTEMPT,1,1,stopping after attempt 1,12.128119,13.13234,1.004221,12.1,13.1,1.0
+map_center,1,CLEARING_COSTMAPS,1,,clearing global and local costmaps,13.13234,13.135018,0.002678,13.1,13.1,0.0
+map_center,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,13.135018,14.137978,1.00296,13.1,14.1,1.0

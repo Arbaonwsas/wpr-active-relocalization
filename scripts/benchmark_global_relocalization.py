@@ -20,6 +20,23 @@ TEST_POSES = (
     ("bottom_right_area", 3.5, -1.5, -2.0944),
 )
 
+TERMINAL_STATES = {"SUCCEEDED", "FAILED"}
+REPORTED_PHASES = (
+    "PREPARING",
+    "INITIALIZING",
+    "SCANNING",
+    "CONFIRMING",
+    "TRANSLATING",
+    "TRANSLATION_SKIPPED",
+    "STOPPING_ATTEMPT",
+    "CLEARING_COSTMAPS",
+    "FINAL_STOPPING",
+)
+RUN_TABLE_PHASES = tuple(
+    state for state in REPORTED_PHASES
+    if state != "TRANSLATION_SKIPPED"
+)
+
 
 def run(command, timeout=30, check=True):
     result = subprocess.run(
@@ -115,6 +132,79 @@ def angle_error(first, second):
     return abs(math.atan2(math.sin(first - second), math.cos(first - second)))
 
 
+def percentile(values, percentage):
+    """Return a linearly interpolated percentile for a numeric sequence."""
+    ordered = sorted(float(value) for value in values)
+    if not ordered:
+        return None
+    if len(ordered) == 1:
+        return ordered[0]
+    position = (len(ordered) - 1) * percentage / 100.0
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return ordered[lower]
+    fraction = position - lower
+    return ordered[lower] + fraction * (ordered[upper] - ordered[lower])
+
+
+def extract_phase_records(events):
+    """Convert timestamped state transitions into phase intervals."""
+    timed_events = [
+        event for event in events
+        if "wall_elapsed_sec" in event and "sim_elapsed_sec" in event
+    ]
+    if not timed_events:
+        return []
+
+    groups = []
+    for event in timed_events:
+        state = str(event.get("state", "UNKNOWN"))
+        if groups and groups[-1]["state"] == state:
+            groups[-1]["events"].append(event)
+        else:
+            groups.append({"state": state, "events": [event]})
+
+    occurrences = {}
+    records = []
+    for index, group in enumerate(groups):
+        state = group["state"]
+        if state in TERMINAL_STATES or index + 1 >= len(groups):
+            continue
+        start = group["events"][0]
+        end = groups[index + 1]["events"][0]
+        occurrences[state] = occurrences.get(state, 0) + 1
+        records.append(
+            {
+                "phase": state,
+                "occurrence": occurrences[state],
+                "attempt": start.get("attempt", ""),
+                "detail": start.get("detail", ""),
+                "start_wall_sec": float(start["wall_elapsed_sec"]),
+                "end_wall_sec": float(end["wall_elapsed_sec"]),
+                "duration_wall_sec": round(
+                    max(
+                        0.0,
+                        float(end["wall_elapsed_sec"])
+                        - float(start["wall_elapsed_sec"]),
+                    ),
+                    6,
+                ),
+                "start_sim_sec": float(start["sim_elapsed_sec"]),
+                "end_sim_sec": float(end["sim_elapsed_sec"]),
+                "duration_sim_sec": round(
+                    max(
+                        0.0,
+                        float(end["sim_elapsed_sec"])
+                        - float(start["sim_elapsed_sec"]),
+                    ),
+                    6,
+                ),
+            }
+        )
+    return records
+
+
 def parse_status_log(path):
     events = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -125,68 +215,102 @@ def parse_status_log(path):
             events.append(json.loads(line))
         except json.JSONDecodeError:
             continue
-    preparing = next(
-        (index for index, event in enumerate(events)
-         if event.get("state") == "PREPARING"),
-        0,
-    )
+    preparing_events = [
+        index for index, event in enumerate(events)
+        if event.get("state") == "PREPARING"
+    ]
+    preparing = preparing_events[-1] if preparing_events else 0
     events = events[preparing:]
+    if events and events[0].get("run_id") is not None:
+        run_id = events[0]["run_id"]
+        events = [event for event in events if event.get("run_id") == run_id]
     attempts = []
     for event in events:
+        if event.get("attempt") is not None:
+            attempts.append(int(event["attempt"]))
         detail = str(event.get("detail", ""))
         match = re.search(r"attempt (\d+)", detail)
         if match:
             attempts.append(int(match.group(1)))
-    return events, max(attempts, default=0)
+    return events, max(attempts, default=0), extract_phase_records(events)
 
 
-def write_markdown(path, rows, started_at):
+def numeric_summary(values):
+    values = [float(value) for value in values]
+    if not values:
+        return None
+    return {
+        "mean": sum(values) / len(values),
+        "p50": percentile(values, 50),
+        "p95": percentile(values, 95),
+        "max": max(values),
+    }
+
+
+def phase_field(state, clock="wall"):
+    return f"phase_{state.lower()}_{clock}_sec"
+
+
+def format_summary(summary):
+    if summary is None:
+        return ("-", "-", "-", "-")
+    return tuple(
+        f"{summary[key]:.3f}" for key in ("mean", "p50", "p95", "max")
+    )
+
+
+def write_markdown(path, rows, started_at, repetitions):
     successes = [row for row in rows if row["success"]]
     durations = [float(row["wall_sec"]) for row in successes]
     position_errors = [float(row["position_error_m"]) for row in successes]
     lines = [
-        "# Global relocalization baseline benchmark",
+        "# Global relocalization timing benchmark",
         "",
         f"- Started: {started_at}",
         (
             "- Scenario: Gazebo is paused, `wpb_home` is teleported, "
             "Gazebo is resumed, then `/global_relocalization` is called."
         ),
-        "- Each location is tested once in this baseline pass.",
+        f"- Requested repetitions per location: {repetitions}.",
         "",
         (
-            "| Location | Kidnapped pose (x, y, yaw) | Result | "
-            "Wall time (s) | Sim time (s) | Attempts | Translation | "
-            "Position error (m) | Yaw error (deg) | Scan score | "
-            "Covariance (x, y, yaw) |"
+            "| Location | Trial | Result | Service wall (s) | Sim (s) | "
+            "Prepare | Init | Scan | Confirm | Translate | Attempt stop | "
+            "Clear maps | Final stop | Attempts | Pos. error (m) |"
         ),
-        "|---|---:|---|---:|---:|---:|---|---:|---:|---:|---|",
+        (
+            "|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|"
+            "---:|---:|---:|---:|"
+        ),
     ]
     for row in rows:
         if "wall_sec" not in row:
             lines.append(
-                f"| {row['location']} | "
-                f"({row['target_x']}, {row['target_y']}, "
-                f"{row['target_yaw']}) | harness error | - | - | - | "
-                "- | - | - | - | - |"
+                f"| {row['location']} | {row['trial']} | harness error | "
+                "- | - | - | - | - | - | - | - | - | - | - | - |"
             )
             continue
+        phase_values = [
+            row.get(phase_field(state), "0.000")
+            for state in RUN_TABLE_PHASES
+        ]
         lines.append(
-            "| {location} | ({target_x}, {target_y}, {target_yaw}) | "
-            "{result} | "
-            "{wall_sec} | {sim_sec} | {attempts} | {translation_used} | "
-            "{position_error_m} | {yaw_error_deg} | {scan_score} | "
-            "({x_variance}, {y_variance}, {yaw_variance}) |".format(
-                result="success" if row["success"] else "failure", **row
-            )
+            f"| {row['location']} | {row['trial']} | "
+            f"{'success' if row['success'] else 'failure'} | "
+            f"{row['wall_sec']} | {row['sim_sec']} | "
+            + " | ".join(phase_values)
+            + f" | {row['attempts']} | {row['position_error_m']} |"
         )
-    lines += ["", "## Summary", ""]
+    lines += ["", "## Recovery summary", ""]
     lines.append(f"- Success rate: {len(successes)}/{len(rows)}.")
     if durations:
-        mean_duration = sum(durations) / len(durations)
+        duration_summary = numeric_summary(durations)
         lines.append(
-            f"- Successful wall time: mean {mean_duration:.2f} s, "
-            f"min {min(durations):.2f} s, max {max(durations):.2f} s."
+            "- Successful service wall time: mean "
+            f"{duration_summary['mean']:.2f} s, "
+            f"P50 {duration_summary['p50']:.2f} s, "
+            f"P95 {duration_summary['p95']:.2f} s, "
+            f"max {duration_summary['max']:.2f} s."
         )
     if position_errors:
         lines.append(
@@ -194,15 +318,111 @@ def write_markdown(path, rows, started_at):
             f"{sum(position_errors) / len(position_errors):.3f} m, "
             f"max {max(position_errors):.3f} m."
         )
+    lines += ["", "### By location", ""]
     lines += [
-        (
-            "- `status_*.log` contains every state transition and "
-            "intermediate quality sample."
-        ),
-        (
-            "- This three-case pass is a baseline for timing work; "
-            "repeat trials are needed before claiming a stability percentage."
-        ),
+        "| Location | Success | Mean (s) | P50 (s) | P95 (s) | Max (s) |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    for location, *_ in TEST_POSES:
+        location_rows = [row for row in rows if row["location"] == location]
+        successful_rows = [row for row in location_rows if row["success"]]
+        summary = numeric_summary(
+            row["wall_sec"] for row in successful_rows
+        )
+        mean, p50, p95, maximum = format_summary(summary)
+        lines.append(
+            f"| {location} | {len(successful_rows)}/{len(location_rows)} | "
+            f"{mean} | {p50} | {p95} | {maximum} |"
+        )
+
+    complete_rows = [row for row in rows if "wall_sec" in row]
+    service_mean = numeric_summary(
+        row["wall_sec"] for row in complete_rows
+    )
+    lines += ["", "## Algorithm phase breakdown", ""]
+    lines += [
+        "| Phase | Mean (s) | P50 (s) | P95 (s) | Max (s) | "
+        "Mean share of service |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    for state in REPORTED_PHASES:
+        field = phase_field(state)
+        summary = numeric_summary(
+            row.get(field, 0.0) for row in complete_rows
+        )
+        mean, p50, p95, maximum = format_summary(summary)
+        share = 0.0
+        if summary and service_mean and service_mean["mean"] > 0.0:
+            share = 100.0 * summary["mean"] / service_mean["mean"]
+        lines.append(
+            f"| {state} | {mean} | {p50} | {p95} | {maximum} | "
+            f"{share:.1f}% |"
+        )
+    overhead_summary = numeric_summary(
+        row.get("service_unaccounted_wall_sec", 0.0)
+        for row in complete_rows
+    )
+    mean, p50, p95, maximum = format_summary(overhead_summary)
+    overhead_share = 0.0
+    if overhead_summary and service_mean and service_mean["mean"] > 0.0:
+        overhead_share = (
+            100.0 * overhead_summary["mean"] / service_mean["mean"]
+        )
+    lines.append(
+        f"| SERVICE/CLI_UNACCOUNTED | {mean} | {p50} | {p95} | "
+        f"{maximum} | {overhead_share:.1f}% |"
+    )
+
+    lines += ["", "## Harness overhead", ""]
+    lines += [
+        "| Operation | Mean (s) | P50 (s) | P95 (s) | Max (s) |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    harness_fields = (
+        ("Pre-test stop", "harness_pre_stop_wall_sec"),
+        ("Pause physics", "harness_pause_wall_sec"),
+        ("Teleport", "harness_teleport_wall_sec"),
+        ("Verify Gazebo pose", "harness_pose_verify_wall_sec"),
+        ("Unpause physics", "harness_unpause_wall_sec"),
+        ("Settle delay", "harness_settle_wall_sec"),
+        ("Post-test clock", "harness_post_clock_wall_sec"),
+        ("Post-test stop", "harness_post_stop_wall_sec"),
+        ("Post-test settle", "harness_post_settle_wall_sec"),
+        ("Capture odometry pose", "harness_capture_odom_wall_sec"),
+        ("Capture AMCL pose", "harness_capture_amcl_wall_sec"),
+        ("Capture quality", "harness_capture_quality_wall_sec"),
+        ("Capture velocity", "harness_capture_twist_wall_sec"),
+        ("Cleanup unpause", "harness_cleanup_unpause_wall_sec"),
+        ("Cleanup stop", "harness_cleanup_stop_wall_sec"),
+        ("Whole test case", "harness_total_wall_sec"),
+    )
+    for label, field in harness_fields:
+        summary = numeric_summary(
+            row[field] for row in complete_rows if field in row
+        )
+        mean, p50, p95, maximum = format_summary(summary)
+        lines.append(
+            f"| {label} | {mean} | {p50} | {p95} | {maximum} |"
+        )
+
+    failures = [row for row in complete_rows if not row["success"]]
+    if failures:
+        lines += ["", "## Failures", ""]
+        for row in failures:
+            lines.append(
+                f"- {row['location']} trial {row['trial']}: "
+                f"last phase `{row.get('last_phase', 'unknown')}`; "
+                f"{row['message']}"
+            )
+
+    lines += [
+        "",
+        "## Raw data",
+        "",
+        "- `results.csv`: one wide row per trial, including phase totals.",
+        "- `phase_timings.csv`: one row per phase occurrence/attempt.",
+        "- `status_*.log`: timestamped state and intermediate quality events.",
+        "- `service_*.log`: raw Trigger service responses.",
         "",
     ]
     path.write_text("\n".join(lines), encoding="utf-8")
@@ -211,16 +431,29 @@ def write_markdown(path, rows, started_at):
 def benchmark_case(
     output_dir,
     location,
+    trial,
     target_x,
     target_y,
     target_yaw,
 ):
-    status_path = output_dir / f"status_{location}.log"
+    suffix = f"{location}_trial_{trial:02d}"
+    status_path = output_dir / f"status_{suffix}.log"
     monitor_file = status_path.open("w", encoding="utf-8")
     monitor = None
+    harness = {}
+    case_start = time.monotonic()
     try:
+        stage_start = time.monotonic()
         publish_stop()
+        harness["harness_pre_stop_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
+
+        stage_start = time.monotonic()
         call_empty("/pause_physics")
+        harness["harness_pause_wall_sec"] = time.monotonic() - stage_start
+
+        stage_start = time.monotonic()
         run(
             [
                 "gz", "model", "-m", "wpb_home",
@@ -228,11 +461,29 @@ def benchmark_case(
                 "-R", "0.0", "-P", "0.0", "-Y", str(target_yaw),
             ]
         )
+        harness["harness_teleport_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
+
+        stage_start = time.monotonic()
         gazebo_pose = run(
             ["gz", "model", "-m", "wpb_home", "-p"]
         ).stdout.strip()
+        harness["harness_pose_verify_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
+
+        stage_start = time.monotonic()
         call_empty("/unpause_physics")
+        harness["harness_unpause_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
+
+        stage_start = time.monotonic()
         time.sleep(2.0)
+        harness["harness_settle_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
 
         monitor = subprocess.Popen(
             [
@@ -254,18 +505,53 @@ def benchmark_case(
             check=False,
         )
         wall_duration = time.monotonic() - wall_start
+
+        stage_start = time.monotonic()
         sim_end = clock_seconds()
+        harness["harness_post_clock_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
+
+        stage_start = time.monotonic()
         publish_stop()
+        harness["harness_post_stop_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
+
+        stage_start = time.monotonic()
         time.sleep(0.5)
+        harness["harness_post_settle_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
+
+        stage_start = time.monotonic()
         odom_pose = capture_topic("/odom", "pose.pose")
+        harness["harness_capture_odom_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
+
+        stage_start = time.monotonic()
         amcl = capture_topic("/amcl_pose")
+        harness["harness_capture_amcl_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
+
+        stage_start = time.monotonic()
         quality_data = capture_topic("/global_relocalization/quality", "data")
+        harness["harness_capture_quality_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
         quality = (
             quality_data
             if isinstance(quality_data, dict)
             else json.loads(quality_data)
         )
+
+        stage_start = time.monotonic()
         twist = capture_topic("/odom", "twist.twist")
+        harness["harness_capture_twist_wall_sec"] = (
+            time.monotonic() - stage_start
+        )
     finally:
         if monitor is not None:
             monitor.terminate()
@@ -275,15 +561,24 @@ def benchmark_case(
                 monitor.kill()
         monitor_file.close()
         try:
+            stage_start = time.monotonic()
             call_empty("/unpause_physics")
+            harness["harness_cleanup_unpause_wall_sec"] = (
+                time.monotonic() - stage_start
+            )
         except Exception:
             pass
         try:
+            stage_start = time.monotonic()
             publish_stop()
+            harness["harness_cleanup_stop_wall_sec"] = (
+                time.monotonic() - stage_start
+            )
         except Exception:
             pass
 
-    events, attempts = parse_status_log(status_path)
+    harness["harness_total_wall_sec"] = time.monotonic() - case_start
+    events, attempts, phase_records = parse_status_log(status_path)
     translation_used = any(
         event.get("state") == "TRANSLATING" for event in events
     )
@@ -324,6 +619,7 @@ def benchmark_case(
 
     row = {
         "location": location,
+        "trial": trial,
         "target_x": f"{target_x:.3f}",
         "target_y": f"{target_y:.3f}",
         "target_yaw": f"{target_yaw:.4f}",
@@ -350,10 +646,52 @@ def benchmark_case(
         "yaw_variance": f"{float(covariance[35]):.4f}",
         "final_speed_norm": f"{final_speed:.6f}",
     }
-    (output_dir / f"service_{location}.log").write_text(
+    for field, value in harness.items():
+        row[field] = f"{value:.3f}"
+
+    for state in REPORTED_PHASES:
+        wall_total = sum(
+            record["duration_wall_sec"]
+            for record in phase_records
+            if record["phase"] == state
+        )
+        sim_total = sum(
+            record["duration_sim_sec"]
+            for record in phase_records
+            if record["phase"] == state
+        )
+        row[phase_field(state)] = f"{wall_total:.3f}"
+        row[phase_field(state, 'sim')] = f"{sim_total:.3f}"
+
+    terminal_events = [
+        event for event in events
+        if event.get("state") in TERMINAL_STATES
+    ]
+    reported_wall = (
+        float(terminal_events[-1].get("wall_elapsed_sec", 0.0))
+        if terminal_events else 0.0
+    )
+    reported_sim = (
+        float(terminal_events[-1].get("sim_elapsed_sec", 0.0))
+        if terminal_events else 0.0
+    )
+    row["node_reported_wall_sec"] = f"{reported_wall:.3f}"
+    row["node_reported_sim_sec"] = f"{reported_sim:.3f}"
+    row["service_unaccounted_wall_sec"] = (
+        f"{max(0.0, wall_duration - reported_wall):.3f}"
+    )
+    row["last_phase"] = (
+        phase_records[-1]["phase"] if phase_records else "unknown"
+    )
+
+    for record in phase_records:
+        record["location"] = location
+        record["trial"] = trial
+
+    (output_dir / f"service_{suffix}.log").write_text(
         response.stdout, encoding="utf-8"
     )
-    return row
+    return row, phase_records
 
 
 def main():
@@ -370,7 +708,15 @@ def main():
         choices=[pose[0] for pose in TEST_POSES],
         help="Run only this location; repeat the option to select several",
     )
+    parser.add_argument(
+        "--repetitions",
+        type=int,
+        default=1,
+        help="Number of trials for every selected location (default: 1)",
+    )
     args = parser.parse_args()
+    if args.repetitions < 1:
+        parser.error("--repetitions must be at least 1")
     started = datetime.now().astimezone()
     output_dir = args.output_dir or (
         Path("benchmark_results") / started.strftime("%Y-%m-%d_%H-%M-%S")
@@ -382,21 +728,36 @@ def main():
         if not args.location or pose[0] in args.location
     ]
     rows = []
+    phase_rows = []
     for location, x, y, yaw in selected_poses:
-        print(f"START {location}: ({x}, {y}, {yaw})", flush=True)
-        try:
-            row = benchmark_case(output_dir, location, x, y, yaw)
-        except Exception as error:
-            row = {
-                "location": location,
-                "target_x": f"{x:.3f}",
-                "target_y": f"{y:.3f}",
-                "target_yaw": f"{yaw:.4f}",
-                "success": False,
-                "message": f"benchmark harness error: {error}",
-            }
-        rows.append(row)
-        print(json.dumps(row, ensure_ascii=False), flush=True)
+        for trial in range(1, args.repetitions + 1):
+            print(
+                f"START {location} trial {trial}/{args.repetitions}: "
+                f"({x}, {y}, {yaw})",
+                flush=True,
+            )
+            try:
+                row, trial_phases = benchmark_case(
+                    output_dir,
+                    location,
+                    trial,
+                    x,
+                    y,
+                    yaw,
+                )
+                phase_rows.extend(trial_phases)
+            except Exception as error:
+                row = {
+                    "location": location,
+                    "trial": trial,
+                    "target_x": f"{x:.3f}",
+                    "target_y": f"{y:.3f}",
+                    "target_yaw": f"{yaw:.4f}",
+                    "success": False,
+                    "message": f"benchmark harness error: {error}",
+                }
+            rows.append(row)
+            print(json.dumps(row, ensure_ascii=False), flush=True)
 
     fieldnames = []
     for row in rows:
@@ -409,7 +770,34 @@ def main():
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
-    write_markdown(output_dir / "README.md", rows, started.isoformat())
+
+    phase_fieldnames = (
+        "location",
+        "trial",
+        "phase",
+        "occurrence",
+        "attempt",
+        "detail",
+        "start_wall_sec",
+        "end_wall_sec",
+        "duration_wall_sec",
+        "start_sim_sec",
+        "end_sim_sec",
+        "duration_sim_sec",
+    )
+    with (output_dir / "phase_timings.csv").open(
+        "w", newline="", encoding="utf-8"
+    ) as phase_file:
+        writer = csv.DictWriter(phase_file, fieldnames=phase_fieldnames)
+        writer.writeheader()
+        writer.writerows(phase_rows)
+
+    write_markdown(
+        output_dir / "README.md",
+        rows,
+        started.isoformat(),
+        args.repetitions,
+    )
     print(f"RESULT_DIR {output_dir.resolve()}", flush=True)
 
 

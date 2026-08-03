@@ -138,6 +138,14 @@ class ActiveGlobalRelocalization(Node):
         self._pose_sequence = 0
         self._laser_transform: tuple[float, float, float] | None = None
         self._laser_frame = ''
+        self._run_sequence = 0
+        self._active_run_id = 0
+        self._event_sequence = 0
+        self._run_start_wall: float | None = None
+        self._run_start_sim: float | None = None
+        self._phase_state = ''
+        self._phase_start_wall: float | None = None
+        self._phase_start_sim: float | None = None
 
         status_qos = QoSProfile(depth=1)
         status_qos.reliability = ReliabilityPolicy.RELIABLE
@@ -350,9 +358,71 @@ class ActiveGlobalRelocalization(Node):
             self._laser_transform = result
         return result
 
-    def _publish_status(self, state: str, detail: str, **extra: object) -> None:
-        payload = {'state': state, 'detail': detail, **extra}
-        self._status_pub.publish(String(data=json.dumps(payload, ensure_ascii=False)))
+    def _sim_seconds(self) -> float:
+        return self.get_clock().now().nanoseconds * 1.0e-9
+
+    def _begin_run_telemetry(self) -> None:
+        now_wall = time.monotonic()
+        now_sim = self._sim_seconds()
+        with self._data_lock:
+            self._run_sequence += 1
+            self._active_run_id = self._run_sequence
+            self._event_sequence = 0
+            self._run_start_wall = now_wall
+            self._run_start_sim = now_sim
+            self._phase_state = ''
+            self._phase_start_wall = now_wall
+            self._phase_start_sim = now_sim
+
+    def _publish_status(
+        self,
+        state: str,
+        detail: str,
+        **extra: object,
+    ) -> None:
+        now_wall = time.monotonic()
+        now_sim = self._sim_seconds()
+        with self._data_lock:
+            if state != self._phase_state:
+                self._phase_state = state
+                self._phase_start_wall = now_wall
+                self._phase_start_sim = now_sim
+            self._event_sequence += 1
+            run_start_wall = self._run_start_wall
+            run_start_sim = self._run_start_sim
+            phase_start_wall = self._phase_start_wall
+            phase_start_sim = self._phase_start_sim
+            payload = {
+                'schema_version': 2,
+                'run_id': self._active_run_id,
+                'event_index': self._event_sequence,
+                'state': state,
+                'detail': detail,
+                'wall_elapsed_sec': round(
+                    now_wall - run_start_wall
+                    if run_start_wall is not None else 0.0,
+                    6,
+                ),
+                'sim_elapsed_sec': round(
+                    now_sim - run_start_sim
+                    if run_start_sim is not None else 0.0,
+                    6,
+                ),
+                'phase_wall_sec': round(
+                    now_wall - phase_start_wall
+                    if phase_start_wall is not None else 0.0,
+                    6,
+                ),
+                'phase_sim_sec': round(
+                    now_sim - phase_start_sim
+                    if phase_start_sim is not None else 0.0,
+                    6,
+                ),
+                **extra,
+            }
+        self._status_pub.publish(
+            String(data=json.dumps(payload, ensure_ascii=False))
+        )
         self.get_logger().info(f'{state}: {detail}')
 
     def _call_service(self, client, request, timeout: float):
@@ -529,6 +599,11 @@ class ActiveGlobalRelocalization(Node):
         initialize_globally: bool,
     ) -> tuple[bool, str]:
         if initialize_globally:
+            self._publish_status(
+                'INITIALIZING',
+                'requesting AMCL global particle initialization',
+                attempt=attempt,
+            )
             response = self._call_service(
                 self._global_init_client, Empty.Request(), self._service_timeout
             )
@@ -545,6 +620,7 @@ class ActiveGlobalRelocalization(Node):
         self._publish_status(
             'SCANNING',
             f'attempt {attempt}/{self._attempts}',
+            attempt=attempt,
             direction=direction,
         )
         period = 1.0 / self._control_frequency
@@ -583,7 +659,22 @@ class ActiveGlobalRelocalization(Node):
                         and self._quality_is_good(quality)
                     ):
                         good_scans += 1
+                        if good_scans == 1:
+                            self._publish_status(
+                                'CONFIRMING',
+                                'first acceptable AMCL update',
+                                attempt=attempt,
+                                required_good_scans=(
+                                    self._required_good_scans
+                                ),
+                            )
                     else:
+                        if good_scans:
+                            self._publish_status(
+                                'SCANNING',
+                                'quality confirmation reset',
+                                attempt=attempt,
+                            )
                         good_scans = 0
                     if good_scans >= self._required_good_scans:
                         return True, (
@@ -597,9 +688,13 @@ class ActiveGlobalRelocalization(Node):
             if rotation - last_report_rotation >= 0.5:
                 last_report_rotation = rotation
                 if quality:
+                    report_state = (
+                        'CONFIRMING' if good_scans else 'SCANNING'
+                    )
                     self._publish_status(
-                        'SCANNING',
+                        report_state,
                         f'attempt {attempt}, rotation {rotation:.2f} rad',
+                        attempt=attempt,
                         score=round(quality.scan_score, 3),
                         beams=quality.beams_used,
                         in_map=round(quality.in_map_fraction, 3),
@@ -624,12 +719,15 @@ class ActiveGlobalRelocalization(Node):
             response.message = 'global relocalization is already running'
             return response
 
+        self._begin_run_telemetry()
+        final_state = 'FAILED'
+        final_detail = 'global relocalization did not complete'
         try:
             ready, detail = self._ready()
             if not ready:
                 response.success = False
                 response.message = detail
-                self._publish_status('FAILED', detail)
+                final_detail = detail
                 return response
 
             self._publish_status('PREPARING', 'canceling navigation and stopping robot')
@@ -646,28 +744,44 @@ class ActiveGlobalRelocalization(Node):
                     deadline,
                     initialize_globally=(attempt == 1),
                 )
+                self._publish_status(
+                    'STOPPING_ATTEMPT',
+                    f'stopping after attempt {attempt}',
+                    attempt=attempt,
+                    attempt_success=success,
+                )
                 self._stop_robot(20)
                 if success:
+                    self._publish_status(
+                        'CLEARING_COSTMAPS',
+                        'clearing global and local costmaps',
+                    )
                     self._clear_costmaps()
                     response.success = True
                     response.message = last_detail
-                    self._publish_status('SUCCEEDED', last_detail)
+                    final_state = 'SUCCEEDED'
+                    final_detail = last_detail
                     return response
                 if time.monotonic() >= deadline:
                     break
 
             response.success = False
             response.message = last_detail
-            self._publish_status('FAILED', last_detail)
+            final_detail = last_detail
             return response
         except Exception as error:  # Always stop the physical command path.
             self.get_logger().error(f'Global relocalization failed: {error}')
             response.success = False
             response.message = str(error)
-            self._publish_status('FAILED', str(error))
+            final_detail = str(error)
             return response
         finally:
+            self._publish_status(
+                'FINAL_STOPPING',
+                'publishing final zero-velocity commands',
+            )
             self._stop_robot(20)
+            self._publish_status(final_state, final_detail)
             self._run_lock.release()
 
 
