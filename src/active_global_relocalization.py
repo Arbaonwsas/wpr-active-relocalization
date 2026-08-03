@@ -30,6 +30,7 @@ from tf2_ros import Buffer, TransformException, TransformListener
 from wpr_relocalization.relocalization_core import (
     ConsecutiveMismatchDetector,
     LikelihoodField,
+    WindowedMismatchDetector,
     normalize_angle,
     quaternion_to_yaw,
 )
@@ -73,6 +74,9 @@ class ActiveGlobalRelocalization(Node):
         self.declare_parameter('automatic_mismatch_score', 0.35)
         self.declare_parameter('automatic_mismatch_in_map_fraction', 0.65)
         self.declare_parameter('automatic_mismatch_scans', 12)
+        self.declare_parameter('automatic_suspect_score', 0.60)
+        self.declare_parameter('automatic_suspect_window_scans', 40)
+        self.declare_parameter('automatic_suspect_required_ratio', 0.90)
         self.declare_parameter('automatic_trigger_cooldown', 8.0)
         self.declare_parameter('translation_distance', 0.55)
         self.declare_parameter('translation_speed', 0.16)
@@ -141,6 +145,16 @@ class ActiveGlobalRelocalization(Node):
             ),
             maximum_xy_variance=self._double('max_xy_variance'),
             maximum_yaw_variance=self._double('max_yaw_variance'),
+        )
+        self._suspect_mismatch_detector = WindowedMismatchDetector(
+            maximum_score=self._double('automatic_suspect_score'),
+            minimum_beams=self._integer('minimum_score_beams'),
+            window_size=max(
+                1, self._integer('automatic_suspect_window_scans')
+            ),
+            required_ratio=self._double(
+                'automatic_suspect_required_ratio'
+            ),
         )
         self._translation_distance = max(
             0.0, self._double('translation_distance')
@@ -591,7 +605,7 @@ class ActiveGlobalRelocalization(Node):
             return
         if self._run_lock.locked():
             with self._data_lock:
-                self._mismatch_detector.reset()
+                self._reset_mismatch_detectors()
             return
 
         now = time.monotonic()
@@ -601,9 +615,9 @@ class ActiveGlobalRelocalization(Node):
                 < self._automatic_trigger_cooldown
             )
             if self._automatic_trigger_pending or cooling_down:
-                self._mismatch_detector.reset()
+                self._reset_mismatch_detectors()
                 return
-            should_trigger = self._mismatch_detector.update(
+            hard_mismatch = self._mismatch_detector.update(
                 quality.scan_score,
                 quality.beams_used,
                 quality.in_map_fraction,
@@ -611,13 +625,22 @@ class ActiveGlobalRelocalization(Node):
                 quality.y_variance,
                 quality.yaw_variance,
             )
-            if not should_trigger:
+            suspect_mismatch = self._suspect_mismatch_detector.update(
+                quality.scan_score,
+                quality.beams_used,
+            )
+            if not hard_mismatch and not suspect_mismatch:
                 return
+            trigger_reason = (
+                'persistent hard mismatch'
+                if hard_mismatch
+                else 'windowed moderate mismatch'
+            )
             self._automatic_trigger_pending = True
 
         thread = threading.Thread(
             target=self._run_automatic_relocalization,
-            args=(quality,),
+            args=(quality, trigger_reason),
             name='automatic_global_relocalization',
             daemon=True,
         )
@@ -626,9 +649,10 @@ class ActiveGlobalRelocalization(Node):
     def _run_automatic_relocalization(
         self,
         quality: LocalizationQuality,
+        trigger_reason: str,
     ) -> None:
         self.get_logger().warning(
-            'Persistent localization mismatch detected; starting automatic '
+            f'{trigger_reason.capitalize()} detected; starting automatic '
             f'recovery (score={quality.scan_score:.3f}, '
             f'in_map={quality.in_map_fraction:.3f})'
         )
@@ -640,6 +664,10 @@ class ActiveGlobalRelocalization(Node):
         finally:
             with self._data_lock:
                 self._automatic_trigger_pending = False
+
+    def _reset_mismatch_detectors(self) -> None:
+        self._mismatch_detector.reset()
+        self._suspect_mismatch_detector.reset()
 
     def _confirm_stationary_quality(
         self,
@@ -1006,7 +1034,7 @@ class ActiveGlobalRelocalization(Node):
             self._publish_status(final_state, final_detail)
             with self._data_lock:
                 self._last_relocalization_end_wall = time.monotonic()
-                self._mismatch_detector.reset()
+                self._reset_mismatch_detectors()
             self._run_lock.release()
 
 

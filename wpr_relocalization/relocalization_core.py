@@ -1,6 +1,7 @@
 """Pure-Python helpers for active AMCL global relocalization."""
 
-from dataclasses import dataclass
+from collections import deque
+from dataclasses import dataclass, field
 import heapq
 import math
 from typing import Sequence
@@ -78,6 +79,44 @@ class ConsecutiveMismatchDetector:
 
         self.consecutive += 1
         if self.consecutive < self.required_consecutive:
+            return False
+        self.reset()
+        return True
+
+
+@dataclass
+class WindowedMismatchDetector:
+    """Detect a mostly persistent, moderate mismatch over a fixed window."""
+
+    maximum_score: float
+    minimum_beams: int
+    window_size: int
+    required_ratio: float
+    samples: deque[bool] = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.maximum_score <= 1.0:
+            raise ValueError("maximum mismatch score must be in [0, 1]")
+        if self.minimum_beams < 1:
+            raise ValueError("minimum beams must be positive")
+        if self.window_size < 1:
+            raise ValueError("window size must be positive")
+        if not 0.0 < self.required_ratio <= 1.0:
+            raise ValueError("required ratio must be in (0, 1]")
+        self.samples = deque(maxlen=self.window_size)
+
+    def reset(self) -> None:
+        self.samples.clear()
+
+    def update(self, score: float, beams_used: int) -> bool:
+        # Missing or extremely sparse scans carry no evidence either way.
+        if beams_used < self.minimum_beams:
+            return False
+
+        self.samples.append(score < self.maximum_score)
+        if len(self.samples) < self.window_size:
+            return False
+        if sum(self.samples) / self.window_size < self.required_ratio:
             return False
         self.reset()
         return True

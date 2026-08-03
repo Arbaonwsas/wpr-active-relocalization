@@ -368,12 +368,16 @@ active_global_relocalization:
     stop_minimum_commands: 3
     stationary_good_scans: 2
     stationary_confirmation_timeout: 2.0
-    # Trigger recovery only after a strict mismatch persists for 0.6 s at the
-    # measured 20 Hz scan rate. Manual /global_relocalization remains usable.
+    # Severe mismatch triggers after 0.6 s. A second 2 s sliding window catches
+    # confidently wrong poses whose score stays just below the success limit;
+    # occasional good frames do not erase the whole window.
     automatic_relocalization: True
     automatic_mismatch_score: 0.35
     automatic_mismatch_in_map_fraction: 0.65
     automatic_mismatch_scans: 12
+    automatic_suspect_score: 0.60
+    automatic_suspect_window_scans: 40
+    automatic_suspect_required_ratio: 0.90
     automatic_trigger_cooldown: 8.0
     translation_distance: 0.55
     translation_speed: 0.24

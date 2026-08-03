@@ -5,6 +5,7 @@ import pytest
 from wpr_relocalization.relocalization_core import (
     ConsecutiveMismatchDetector,
     LikelihoodField,
+    WindowedMismatchDetector,
     normalize_angle,
     quaternion_to_yaw,
 )
@@ -119,3 +120,36 @@ def test_consecutive_mismatch_detects_lost_covariance() -> None:
 def test_consecutive_mismatch_validates_configuration(arguments) -> None:
     with pytest.raises(ValueError):
         ConsecutiveMismatchDetector(*arguments)
+
+
+def test_windowed_mismatch_tolerates_occasional_good_scans() -> None:
+    detector = WindowedMismatchDetector(0.60, 25, 10, 0.80)
+
+    scores = [0.55, 0.54, 0.80, 0.56, 0.57, 0.58, 0.75, 0.59, 0.50]
+    for score in scores:
+        assert not detector.update(score, 100)
+    assert detector.update(0.52, 100)
+    assert len(detector.samples) == 0
+
+
+def test_windowed_mismatch_rejects_healthy_window_and_sparse_scans() -> None:
+    detector = WindowedMismatchDetector(0.60, 25, 4, 0.75)
+
+    assert not detector.update(0.20, 10)
+    assert len(detector.samples) == 0
+    for score in [0.50, 0.80, 0.70, 0.55]:
+        assert not detector.update(score, 100)
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        (-0.1, 10, 4, 0.5),
+        (0.5, 0, 4, 0.5),
+        (0.5, 10, 0, 0.5),
+        (0.5, 10, 4, 0.0),
+    ],
+)
+def test_windowed_mismatch_validates_configuration(arguments) -> None:
+    with pytest.raises(ValueError):
+        WindowedMismatchDetector(*arguments)
