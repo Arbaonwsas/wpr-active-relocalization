@@ -167,6 +167,7 @@ ament_target_dependencies(demo_nav2_client
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
+  find_package(ament_cmake_pytest REQUIRED)
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
@@ -175,17 +176,21 @@ if(BUILD_TESTING)
   # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+  ament_add_pytest_test(test_relocalization_core
+    test/test_relocalization_core.py
+  )
 endif()
 
 install(DIRECTORY config launch demo_launch worlds models meshes rviz src msg maps
   DESTINATION share/${PROJECT_NAME})
 
 # Install Python modules
-# ament_python_install_package(${PROJECT_NAME})
+ament_python_install_package(wpr_relocalization)
 
 # Install Python executables
 install(PROGRAMS
   src/face_detector.py
+  src/active_global_relocalization.py
   src/keyboard_hold_ctrl.py
   DESTINATION lib/${PROJECT_NAME}
 )

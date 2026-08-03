@@ -73,11 +73,20 @@ def generate_launch_description():
             arguments=['-d', [os.path.join(get_package_share_directory('wpr_simulation2'), 'rviz', 'navi.rviz')]]
         )
 
+    global_relocalization_cmd = Node(
+        package='wpr_simulation2',
+        executable='active_global_relocalization.py',
+        name='active_global_relocalization',
+        output='screen',
+        parameters=[nav_param_file, {'use_sim_time': use_sim_time}],
+    )
+
     ld = LaunchDescription()
 
     # Add the commands to the launch description
     ld.add_action(home_cmd)
     ld.add_action(navigation_cmd)
+    ld.add_action(global_relocalization_cmd)
     ld.add_action(rviz_cmd)
 
     return ld

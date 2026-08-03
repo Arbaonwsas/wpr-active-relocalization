@@ -17,14 +17,14 @@ amcl:
     laser_max_range: 100.0
     laser_min_range: -1.0
     laser_model_type: "likelihood_field"
-    max_beams: 60
-    max_particles: 2000
-    min_particles: 500
+    max_beams: 180
+    max_particles: 10000
+    min_particles: 1000
     odom_frame_id: "odom"
-    pf_err: 0.05
+    pf_err: 0.03
     pf_z: 0.99
-    recovery_alpha_fast: 0.0
-    recovery_alpha_slow: 0.0
+    recovery_alpha_fast: 0.1
+    recovery_alpha_slow: 0.001
     resample_interval: 1
     robot_model_type: "nav2_amcl::OmniMotionModel"
     save_pose_rate: 0.5
@@ -33,10 +33,10 @@ amcl:
     transform_tolerance: 1.0
     update_min_a: 0.2
     update_min_d: 0.25
-    z_hit: 0.5
-    z_max: 0.05
-    z_rand: 0.5
-    z_short: 0.05
+    z_hit: 0.75
+    z_max: 0.025
+    z_rand: 0.20
+    z_short: 0.025
     scan_topic: "/scan"
 
 bt_navigator:
@@ -134,7 +134,7 @@ controller_server:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.05
+      yaw_goal_tolerance: 0.20
     # DWB parameters
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
@@ -146,7 +146,7 @@ controller_server:
       max_vel_theta: 1.0
       min_speed_xy: 0.0
       max_speed_xy: 0.26
-      min_speed_theta: 0.0
+      min_speed_theta: 0.12
       acc_lim_x: 2.5
       acc_lim_y: 0.0
       acc_lim_theta: 3.2
@@ -344,3 +344,29 @@ velocity_smoother:
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
+
+active_global_relocalization:
+  ros__parameters:
+    use_sim_time: True
+    angular_speed: 0.35
+    rotation_radians: 7.20
+    attempts: 2
+    minimum_rotation_before_success: 1.20
+    control_frequency: 20.0
+    service_timeout: 15.0
+    maximum_wall_duration: 360.0
+    motion_stall_timeout: 15.0
+    translation_distance: 0.55
+    translation_speed: 0.16
+    translation_clearance: 0.45
+    translation_sector_half_angle: 0.52
+    consecutive_good_scans: 3
+    max_xy_variance: 0.40
+    max_yaw_variance: 0.12
+    minimum_scan_score: 0.60
+    minimum_in_map_fraction: 0.80
+    minimum_score_beams: 25
+    score_sigma: 0.20
+    score_minimum_range: 0.35
+    score_maximum_range: 8.0
+    score_maximum_beams: 180

@@ -51,3 +51,27 @@ Navigation导航:
 ros2 launch wpr_simulation2 navigation.launch.py 
 ```
 ![wpb_navigation pic](./media/wpb_navigation.png)
+
+### 主动全局重定位
+
+导航启动后，调用以下服务可执行完整的主动全局重定位：
+
+```
+ros2 service call /global_relocalization std_srvs/srv/Trigger "{}"
+```
+
+该过程会取消正在执行的导航目标、停止底盘、重新全局散布 AMCL
+粒子并原地旋转扫描。若旋转后仍存在对称定位假设，系统会依据实时激光
+净空选择安全方向短距离平移，再反向扫描。只有多个不同 AMCL 更新的
+协方差和激光—地图一致性评分连续通过阈值时才返回成功；失败时机器人
+会停车，不会在错误定位上继续导航。
+
+可用下面两个话题监控过程：
+
+```
+ros2 topic echo /global_relocalization/status
+ros2 topic echo /global_relocalization/quality
+```
+
+注意：本仿真模型使用 `libgazebo_ros_planar_move.so`，在 Gazebo 中直接
+拖动模型会使 `/odom` 同时跳变，因此不属于严格的绑架机器人测试。
