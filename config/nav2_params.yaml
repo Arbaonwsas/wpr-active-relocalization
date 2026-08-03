@@ -336,10 +336,10 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.26, 0.0, 1.0]
-    min_velocity: [-0.26, 0.0, -1.0]
-    max_accel: [2.5, 0.0, 3.2]
-    max_decel: [-2.5, 0.0, -3.2]
+    max_velocity: [0.26, 0.0, 1.5]
+    min_velocity: [-0.26, 0.0, -1.5]
+    max_accel: [2.5, 0.0, 4.8]
+    max_decel: [-2.5, 0.0, -4.8]
     odom_topic: "/odom"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
@@ -348,7 +348,7 @@ velocity_smoother:
 active_global_relocalization:
   ros__parameters:
     use_sim_time: True
-    angular_speed: 1.0
+    angular_speed: 1.5
     rotation_radians: 7.60
     attempts: 2
     minimum_rotation_before_success: 1.20
@@ -356,8 +356,14 @@ active_global_relocalization:
     service_timeout: 15.0
     maximum_wall_duration: 360.0
     motion_stall_timeout: 15.0
+    # Stop phases return early only after fresh odometry reports a stationary
+    # base for three consecutive samples. The existing repetition count remains
+    # the hard upper bound if odometry is delayed or the base is still moving.
+    stop_speed_threshold: 0.01
+    stop_consecutive_samples: 3
+    stop_minimum_commands: 3
     translation_distance: 0.55
-    translation_speed: 0.16
+    translation_speed: 0.24
     translation_clearance: 0.45
     translation_sector_half_angle: 0.52
     consecutive_good_scans: 3

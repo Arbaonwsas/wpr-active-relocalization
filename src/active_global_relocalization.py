@@ -63,6 +63,9 @@ class ActiveGlobalRelocalization(Node):
         self.declare_parameter('service_timeout', 15.0)
         self.declare_parameter('maximum_wall_duration', 360.0)
         self.declare_parameter('motion_stall_timeout', 15.0)
+        self.declare_parameter('stop_speed_threshold', 0.01)
+        self.declare_parameter('stop_consecutive_samples', 3)
+        self.declare_parameter('stop_minimum_commands', 3)
         self.declare_parameter('translation_distance', 0.55)
         self.declare_parameter('translation_speed', 0.16)
         self.declare_parameter('translation_clearance', 0.45)
@@ -98,6 +101,15 @@ class ActiveGlobalRelocalization(Node):
         self._motion_stall_timeout = max(
             3.0, self._double('motion_stall_timeout')
         )
+        self._stop_speed_threshold = max(
+            0.0, self._double('stop_speed_threshold')
+        )
+        self._stop_consecutive_samples = max(
+            1, self._integer('stop_consecutive_samples')
+        )
+        self._stop_minimum_commands = max(
+            1, self._integer('stop_minimum_commands')
+        )
         self._translation_distance = max(
             0.0, self._double('translation_distance')
         )
@@ -130,6 +142,8 @@ class ActiveGlobalRelocalization(Node):
         self._latest_pose: PoseWithCovarianceStamped | None = None
         self._latest_odom_yaw: float | None = None
         self._latest_odom_position: tuple[float, float] | None = None
+        self._latest_speed_norm: float | None = None
+        self._odom_sequence = 0
         self._latest_odom_wall_time = 0.0
         self._latest_scan_wall_time = 0.0
         self._latest_scan: LaserScan | None = None
@@ -272,6 +286,12 @@ class ActiveGlobalRelocalization(Node):
                 message.pose.pose.position.x,
                 message.pose.pose.position.y,
             )
+            self._latest_speed_norm = max(
+                abs(message.twist.twist.linear.x),
+                abs(message.twist.twist.linear.y),
+                abs(message.twist.twist.angular.z),
+            )
+            self._odom_sequence += 1
             self._latest_odom_wall_time = time.monotonic()
 
     def _on_scan(self, message: LaserScan) -> None:
@@ -467,12 +487,33 @@ class ActiveGlobalRelocalization(Node):
     def _stop_robot(self, repetitions: int = 20) -> None:
         zero = Twist()
         period = 1.0 / self._control_frequency
-        for _ in range(repetitions):
+        stable_samples = 0
+        with self._data_lock:
+            last_odom_sequence = self._odom_sequence
+        for command_index in range(repetitions):
             try:
                 self._cmd_pub.publish(zero)
             except Exception:
                 break
             time.sleep(period)
+            with self._data_lock:
+                odom_sequence = self._odom_sequence
+                speed_norm = self._latest_speed_norm
+            if odom_sequence == last_odom_sequence:
+                continue
+            last_odom_sequence = odom_sequence
+            if (
+                speed_norm is not None
+                and speed_norm <= self._stop_speed_threshold
+            ):
+                stable_samples += 1
+            else:
+                stable_samples = 0
+            if (
+                command_index + 1 >= self._stop_minimum_commands
+                and stable_samples >= self._stop_consecutive_samples
+            ):
+                return
 
     def _ready(self) -> tuple[bool, str]:
         with self._data_lock:

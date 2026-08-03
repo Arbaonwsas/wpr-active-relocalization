@@ -97,9 +97,13 @@ python3 scripts/benchmark_global_relocalization.py \
 - `phase_timings.csv`：每次尝试中初始化、扫描、确认、平移、停车和清图的
   起止墙钟/仿真时间；
 - `README.md`：分位置成功率、P50、P95、最大恢复时间、阶段耗时占比和实验
-  夹具开销；
+夹具开销；
 - `status_*.log`：带 `run_id` 和事件序号的原始状态事件，避免混入上一次
   瞬态持久消息。
 
 算法阶段时间和暂停、传送、恢复 Gazebo、采集结果等实验夹具时间分开统计，
 因此后续优化时不会把测试脚本本身的等待误认为重定位耗时。
+
+当前第二轮优化后的三位置九次测试成功率为 `9/9`，平均恢复时间 `10.42 s`、
+P50 `9.47 s`、P95 `15.82 s`，完整数据见
+[第二轮优化结果](benchmark_results/2026-08-03_speed_1_5_translation_0_24_repeat3/README.md)。
