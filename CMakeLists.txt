@@ -186,6 +186,7 @@ install(DIRECTORY config launch demo_launch worlds models meshes rviz src msg ma
 # Install Python executables
 install(PROGRAMS
   src/face_detector.py
+  src/keyboard_hold_ctrl.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
