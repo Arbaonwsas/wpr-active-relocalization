@@ -75,3 +75,9 @@ ros2 topic echo /global_relocalization/quality
 
 注意：本仿真模型使用 `libgazebo_ros_planar_move.so`，在 Gazebo 中直接
 拖动模型会使 `/odom` 同时跳变，因此不属于严格的绑架机器人测试。
+
+### 全局重定位基准测试
+
+2026-08-03 的首轮三位置基准测试全部恢复成功，平均墙钟恢复时长为
+186.49 秒。详细时长、真实位姿误差、原始状态日志和复测方法见
+[基准测试记录](benchmark_results/2026-08-03_baseline/README.md)。

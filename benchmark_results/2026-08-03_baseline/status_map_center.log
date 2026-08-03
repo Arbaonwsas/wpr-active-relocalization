@@ -1,0 +1,28 @@
+{"state": "SUCCEEDED", "detail": "converged after 7.10 rad; score=0.966, variance=(0.085, 0.034, 0.117)"}
+---
+{"state": "PREPARING", "detail": "canceling navigation and stopping robot"}
+---
+{"state": "SCANNING", "detail": "attempt 1/2", "direction": 1.0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 0.50 rad", "score": 0.139, "beams": 169, "in_map": 0.787, "covariance": [6.467, 3.812, 8.191], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 1.00 rad", "score": 0.252, "beams": 173, "in_map": 0.827, "covariance": [4.741, 3.095, 8.757], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 1.51 rad", "score": 0.274, "beams": 173, "in_map": 0.821, "covariance": [2.91, 2.054, 5.446], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 2.01 rad", "score": 0.347, "beams": 169, "in_map": 0.852, "covariance": [1.801, 1.275, 3.388], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 2.51 rad", "score": 0.667, "beams": 172, "in_map": 0.907, "covariance": [0.578, 0.4, 1.521], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 3.01 rad", "score": 0.446, "beams": 172, "in_map": 0.843, "covariance": [0.268, 0.178, 0.945], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 3.51 rad", "score": 0.754, "beams": 173, "in_map": 0.861, "covariance": [0.067, 0.042, 0.483], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 4.02 rad", "score": 0.508, "beams": 172, "in_map": 0.837, "covariance": [0.048, 0.03, 0.237], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 4.52 rad", "score": 0.767, "beams": 171, "in_map": 0.854, "covariance": [0.037, 0.023, 0.173], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 5.02 rad", "score": 0.525, "beams": 172, "in_map": 0.831, "covariance": [0.035, 0.026, 0.136], "good_scans": 0}
+---
+{"state": "SUCCEEDED", "detail": "converged after 5.48 rad; score=0.967, variance=(0.037, 0.028, 0.044)"}
+---
