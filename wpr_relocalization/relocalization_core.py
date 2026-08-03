@@ -26,6 +26,63 @@ class ScanScore:
     in_map_fraction: float
 
 
+@dataclass
+class ConsecutiveMismatchDetector:
+    """Require persistent scan mismatch before requesting recovery."""
+
+    maximum_score: float
+    minimum_in_map_fraction: float
+    minimum_beams: int
+    required_consecutive: int
+    maximum_xy_variance: float = math.inf
+    maximum_yaw_variance: float = math.inf
+    consecutive: int = 0
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.maximum_score <= 1.0:
+            raise ValueError("maximum mismatch score must be in [0, 1]")
+        if not 0.0 <= self.minimum_in_map_fraction <= 1.0:
+            raise ValueError("minimum in-map fraction must be in [0, 1]")
+        if self.minimum_beams < 1:
+            raise ValueError("minimum beams must be positive")
+        if self.required_consecutive < 1:
+            raise ValueError("required consecutive scans must be positive")
+        if self.maximum_xy_variance < 0.0:
+            raise ValueError("maximum XY variance must be non-negative")
+        if self.maximum_yaw_variance < 0.0:
+            raise ValueError("maximum yaw variance must be non-negative")
+
+    def reset(self) -> None:
+        self.consecutive = 0
+
+    def update(
+        self,
+        score: float,
+        beams_used: int,
+        in_map_fraction: float,
+        x_variance: float = 0.0,
+        y_variance: float = 0.0,
+        yaw_variance: float = 0.0,
+    ) -> bool:
+        enough_beams = beams_used >= self.minimum_beams
+        mismatched = enough_beams and (
+            score < self.maximum_score
+            or in_map_fraction < self.minimum_in_map_fraction
+            or x_variance > self.maximum_xy_variance
+            or y_variance > self.maximum_xy_variance
+            or yaw_variance > self.maximum_yaw_variance
+        )
+        if not mismatched:
+            self.reset()
+            return False
+
+        self.consecutive += 1
+        if self.consecutive < self.required_consecutive:
+            return False
+        self.reset()
+        return True
+
+
 class LikelihoodField:
     """
     Distance-to-obstacle field used to validate an AMCL pose.

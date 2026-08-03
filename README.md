@@ -66,6 +66,16 @@ ros2 service call /global_relocalization std_srvs/srv/Trigger "{}"
 协方差和激光—地图一致性评分连续通过阈值时才返回成功；失败时机器人
 会停车，不会在错误定位上继续导航。
 
+导航配置默认同时启用自动质量看门狗。当前位姿的激光—地图匹配分数低于
+`0.35`、有效激光端点大量落出地图，或 AMCL 协方差超过成功门槛时，必须连续
+12 帧（20 Hz 激光下约 `0.6 s`）才会自动调用同一套全局重定位。恢复期间不会
+重复触发，完成后还有 `8 s` 冷却时间；上述手动服务始终保留。
+
+连续体验自动恢复时，只需在 Gazebo 暂停物理、将 `wpb_home` 移到没有碰撞的
+新位置并恢复物理，不要调用服务，也不要在 RViz 点击 `2D Pose Estimate`。正常
+情况下约 0.6 秒后机器人会自动开始旋转扫描，恢复成功并静止后可以再次暂停、
+移动和恢复。
+
 可用下面两个话题监控过程：
 
 ```
@@ -73,8 +83,9 @@ ros2 topic echo /global_relocalization/status
 ros2 topic echo /global_relocalization/quality
 ```
 
-注意：本仿真模型使用 `libgazebo_ros_planar_move.so`，在 Gazebo 中直接
-拖动模型会使 `/odom` 同时跳变，因此不属于严格的绑架机器人测试。
+注意：本仿真模型使用 `libgazebo_ros_planar_move.so`，在 Gazebo 中直接拖动模型
+会使 `/odom` 同时跳变，适合连续功能体验，但不属于严格的里程计不知情绑架测试。
+正式基准仍以 Gazebo 真值、AMCL 误差和分阶段时间作为判据。
 
 ### 全局重定位基准测试
 
