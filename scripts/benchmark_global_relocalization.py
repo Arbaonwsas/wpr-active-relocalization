@@ -40,7 +40,10 @@ def run(command, timeout=30, check=True):
 
 def first_yaml_document(output):
     documents = list(yaml.safe_load_all(output))
-    return next((document for document in documents if document is not None), None)
+    return next(
+        (document for document in documents if document is not None),
+        None,
+    )
 
 
 def capture_topic(topic, field=None, timeout=10):
@@ -162,12 +165,15 @@ def write_markdown(path, rows, started_at):
     for row in rows:
         if "wall_sec" not in row:
             lines.append(
-                f"| {row['location']} | ({row['target_x']}, {row['target_y']}, "
-                f"{row['target_yaw']}) | harness error | - | - | - | - | - | - | - | - |"
+                f"| {row['location']} | "
+                f"({row['target_x']}, {row['target_y']}, "
+                f"{row['target_yaw']}) | harness error | - | - | - | "
+                "- | - | - | - | - |"
             )
             continue
         lines.append(
-            "| {location} | ({target_x}, {target_y}, {target_yaw}) | {result} | "
+            "| {location} | ({target_x}, {target_y}, {target_yaw}) | "
+            "{result} | "
             "{wall_sec} | {sim_sec} | {attempts} | {translation_used} | "
             "{position_error_m} | {yaw_error_deg} | {scan_score} | "
             "({x_variance}, {y_variance}, {yaw_variance}) |".format(
@@ -177,8 +183,9 @@ def write_markdown(path, rows, started_at):
     lines += ["", "## Summary", ""]
     lines.append(f"- Success rate: {len(successes)}/{len(rows)}.")
     if durations:
+        mean_duration = sum(durations) / len(durations)
         lines.append(
-            f"- Successful wall time: mean {sum(durations) / len(durations):.2f} s, "
+            f"- Successful wall time: mean {mean_duration:.2f} s, "
             f"min {min(durations):.2f} s, max {max(durations):.2f} s."
         )
     if position_errors:
@@ -188,7 +195,10 @@ def write_markdown(path, rows, started_at):
             f"max {max(position_errors):.3f} m."
         )
     lines += [
-        "- `status_*.log` contains every state transition and intermediate quality sample.",
+        (
+            "- `status_*.log` contains every state transition and "
+            "intermediate quality sample."
+        ),
         (
             "- This three-case pass is a baseline for timing work; "
             "repeat trials are needed before claiming a stability percentage."
@@ -198,7 +208,13 @@ def write_markdown(path, rows, started_at):
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def benchmark_case(output_dir, location, target_x, target_y, target_yaw):
+def benchmark_case(
+    output_dir,
+    location,
+    target_x,
+    target_y,
+    target_yaw,
+):
     status_path = output_dir / f"status_{location}.log"
     monitor_file = status_path.open("w", encoding="utf-8")
     monitor = None
@@ -212,7 +228,9 @@ def benchmark_case(output_dir, location, target_x, target_y, target_yaw):
                 "-R", "0.0", "-P", "0.0", "-Y", str(target_yaw),
             ]
         )
-        gazebo_pose = run(["gz", "model", "-m", "wpb_home", "-p"]).stdout.strip()
+        gazebo_pose = run(
+            ["gz", "model", "-m", "wpb_home", "-p"]
+        ).stdout.strip()
         call_empty("/unpause_physics")
         time.sleep(2.0)
 
@@ -270,9 +288,17 @@ def benchmark_case(output_dir, location, target_x, target_y, target_yaw):
         event.get("state") == "TRANSLATING" for event in events
     )
     success_match = re.search(r"success=(True|False)", response.stdout)
-    message_match = re.search(r"message='(.*?)'\)", response.stdout, re.DOTALL)
+    message_match = re.search(
+        r"message='(.*?)'\)",
+        response.stdout,
+        re.DOTALL,
+    )
     success = bool(success_match and success_match.group(1) == "True")
-    message = message_match.group(1) if message_match else response.stdout.strip()
+    message = (
+        message_match.group(1)
+        if message_match
+        else response.stdout.strip()
+    )
 
     odom_position = odom_pose["position"]
     odom_yaw = yaw_from_orientation(odom_pose["orientation"])

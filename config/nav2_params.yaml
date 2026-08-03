@@ -348,8 +348,8 @@ velocity_smoother:
 active_global_relocalization:
   ros__parameters:
     use_sim_time: True
-    angular_speed: 0.35
-    rotation_radians: 7.20
+    angular_speed: 1.0
+    rotation_radians: 7.60
     attempts: 2
     minimum_rotation_before_success: 1.20
     control_frequency: 20.0
@@ -370,3 +370,7 @@ active_global_relocalization:
     score_minimum_range: 0.35
     score_maximum_range: 8.0
     score_maximum_beams: 180
+    # Feed recovery motion through Nav2's velocity smoother. Publishing
+    # directly to /cmd_vel races the smoother's 20 Hz output and reduces the
+    # effective angular speed dramatically.
+    cmd_vel_topic: "/cmd_vel_nav"

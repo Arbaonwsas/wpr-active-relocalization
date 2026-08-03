@@ -1,0 +1,48 @@
+{"state": "SUCCEEDED", "detail": "converged after 6.29 rad; score=0.774, variance=(0.039, 0.031, 0.047)"}
+---
+{"state": "PREPARING", "detail": "canceling navigation and stopping robot"}
+---
+{"state": "SCANNING", "detail": "attempt 1/2", "direction": 1.0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 0.51 rad", "score": 0.31, "beams": 169, "in_map": 1.0, "covariance": [8.78, 4.195, 10.889], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 1.02 rad", "score": 0.266, "beams": 171, "in_map": 1.0, "covariance": [8.183, 3.672, 7.259], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 1.52 rad", "score": 0.198, "beams": 170, "in_map": 1.0, "covariance": [8.122, 3.078, 4.16], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 2.02 rad", "score": 0.089, "beams": 168, "in_map": 1.0, "covariance": [7.299, 2.283, 2.296], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 2.52 rad", "score": 0.892, "beams": 169, "in_map": 1.0, "covariance": [4.835, 1.168, 0.978], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 3.02 rad", "score": 0.898, "beams": 170, "in_map": 1.0, "covariance": [3.271, 0.689, 0.561], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 3.52 rad", "score": 0.823, "beams": 171, "in_map": 0.994, "covariance": [2.29, 0.446, 0.327], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 4.02 rad", "score": 0.755, "beams": 169, "in_map": 0.976, "covariance": [1.973, 0.327, 0.237], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 4.53 rad", "score": 0.944, "beams": 170, "in_map": 1.0, "covariance": [1.404, 0.232, 0.169], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 5.03 rad", "score": 0.896, "beams": 171, "in_map": 1.0, "covariance": [1.101, 0.187, 0.144], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 5.53 rad", "score": 0.83, "beams": 169, "in_map": 0.994, "covariance": [1.239, 0.256, 0.155], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 6.03 rad", "score": 0.761, "beams": 170, "in_map": 0.982, "covariance": [0.808, 0.166, 0.104], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 6.53 rad", "score": 0.956, "beams": 171, "in_map": 1.0, "covariance": [0.419, 0.09, 0.069], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 7.03 rad", "score": 0.938, "beams": 169, "in_map": 1.0, "covariance": [0.335, 0.073, 0.062], "good_scans": 2}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 7.54 rad", "score": 0.858, "beams": 169, "in_map": 0.988, "covariance": [0.561, 0.113, 0.084], "good_scans": 0}
+---
+{"state": "TRANSLATING", "detail": "breaking symmetric localization hypotheses", "direction": "backward", "distance": 0.55, "front_clearance": 1.06, "rear_clearance": 1.1}
+---
+{"state": "SCANNING", "detail": "attempt 2/2", "direction": -1.0}
+---
+{"state": "SCANNING", "detail": "attempt 2, rotation 0.50 rad", "score": 0.689, "beams": 172, "in_map": 0.878, "covariance": [0.375, 0.086, 0.096], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 2, rotation 1.01 rad", "score": 0.951, "beams": 170, "in_map": 0.994, "covariance": [0.149, 0.041, 0.057], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 2, rotation 1.51 rad", "score": 0.863, "beams": 174, "in_map": 0.943, "covariance": [0.064, 0.022, 0.041], "good_scans": 2}
+---
+{"state": "SUCCEEDED", "detail": "converged after 1.65 rad; score=0.914, variance=(0.060, 0.025, 0.037)"}
+---

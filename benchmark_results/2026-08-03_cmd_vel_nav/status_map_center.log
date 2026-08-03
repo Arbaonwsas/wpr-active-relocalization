@@ -1,0 +1,28 @@
+{"state": "FAILED", "detail": "attempt 2 completed without convergence"}
+---
+{"state": "PREPARING", "detail": "canceling navigation and stopping robot"}
+---
+{"state": "SCANNING", "detail": "attempt 1/2", "direction": 1.0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 0.50 rad", "score": 0.218, "beams": 169, "in_map": 0.84, "covariance": [6.679, 3.988, 6.728], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 1.01 rad", "score": 0.215, "beams": 173, "in_map": 0.85, "covariance": [4.948, 3.239, 6.744], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 1.51 rad", "score": 0.264, "beams": 171, "in_map": 0.83, "covariance": [2.854, 2.001, 4.213], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 2.01 rad", "score": 0.335, "beams": 169, "in_map": 0.84, "covariance": [1.427, 1.049, 2.298], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 2.51 rad", "score": 0.67, "beams": 172, "in_map": 0.86, "covariance": [0.386, 0.252, 0.902], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 3.01 rad", "score": 0.487, "beams": 170, "in_map": 0.829, "covariance": [0.16, 0.104, 0.538], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 3.51 rad", "score": 0.744, "beams": 172, "in_map": 0.831, "covariance": [0.047, 0.038, 0.288], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 4.01 rad", "score": 0.496, "beams": 171, "in_map": 0.825, "covariance": [0.035, 0.03, 0.234], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 4.52 rad", "score": 0.801, "beams": 170, "in_map": 0.871, "covariance": [0.042, 0.026, 0.155], "good_scans": 0}
+---
+{"state": "SCANNING", "detail": "attempt 1, rotation 5.02 rad", "score": 0.516, "beams": 172, "in_map": 0.837, "covariance": [0.046, 0.029, 0.103], "good_scans": 1}
+---
+{"state": "SUCCEEDED", "detail": "converged after 5.28 rad; score=0.980, variance=(0.046, 0.026, 0.043)"}
+---
