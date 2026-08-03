@@ -1,0 +1,22 @@
+location,trial,phase,occurrence,attempt,detail,start_wall_sec,end_wall_sec,duration_wall_sec,start_sim_sec,end_sim_sec,duration_sim_sec
+top_left_room,1,PREPARING,1,,canceling navigation and stopping robot,3.2e-05,0.152325,0.152293,0.0,0.1,0.1
+top_left_room,1,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152325,0.169382,0.017057,0.1,0.1,0.0
+top_left_room,1,SCANNING,1,1,attempt 1/2,0.169382,2.733868,2.564486,0.1,2.7,2.6
+top_left_room,1,CONFIRMING,1,1,first acceptable AMCL update,2.733868,2.935521,0.201653,2.7,2.9,0.2
+top_left_room,1,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.935521,3.388085,0.452564,2.9,3.3,0.4
+top_left_room,1,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.388085,3.390463,0.002378,3.3,3.3,0.0
+top_left_room,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.390463,3.541145,0.150682,3.3,3.5,0.2
+top_left_room,2,PREPARING,1,,canceling navigation and stopping robot,3.8e-05,0.152308,0.15227,0.0,0.2,0.2
+top_left_room,2,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152308,0.169781,0.017473,0.2,0.2,0.0
+top_left_room,2,SCANNING,1,1,attempt 1/2,0.169781,7.112487,6.942706,0.2,7.1,6.9
+top_left_room,2,CONFIRMING,1,1,first acceptable AMCL update,7.112487,7.313616,0.201129,7.1,7.3,0.2
+top_left_room,2,STOPPING_ATTEMPT,1,1,stopping after attempt 1,7.313616,7.765423,0.451807,7.3,7.8,0.5
+top_left_room,2,CLEARING_COSTMAPS,1,,clearing global and local costmaps,7.765423,7.768502,0.003079,7.8,7.8,0.0
+top_left_room,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,7.768502,7.91965,0.151148,7.8,8.0,0.2
+top_left_room,3,PREPARING,1,,canceling navigation and stopping robot,3.1e-05,0.152561,0.15253,0.0,0.1,0.1
+top_left_room,3,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152561,0.168922,0.016361,0.1,0.1,0.0
+top_left_room,3,SCANNING,1,1,attempt 1/2,0.168922,2.679156,2.510234,0.1,2.7,2.6
+top_left_room,3,CONFIRMING,1,1,first acceptable AMCL update,2.679156,2.880231,0.201075,2.7,2.9,0.2
+top_left_room,3,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.880231,3.332366,0.452135,2.9,3.3,0.4
+top_left_room,3,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.332366,3.334958,0.002592,3.3,3.3,0.0
+top_left_room,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.334958,3.485829,0.150871,3.3,3.5,0.2

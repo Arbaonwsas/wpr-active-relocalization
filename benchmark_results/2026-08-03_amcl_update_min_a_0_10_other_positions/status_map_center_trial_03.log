@@ -1,0 +1,24 @@
+{"schema_version": 2, "run_id": 15, "event_index": 11, "state": "SUCCEEDED", "detail": "converged after 2.13 rad; score=0.619, variance=(0.012, 0.010, 0.037)", "wall_elapsed_sec": 3.035287, "sim_elapsed_sec": 3.0, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 1, "state": "PREPARING", "detail": "canceling navigation and stopping robot", "wall_elapsed_sec": 3.1e-05, "sim_elapsed_sec": 0.0, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 2, "state": "INITIALIZING", "detail": "requesting AMCL global particle initialization", "wall_elapsed_sec": 0.152258, "sim_elapsed_sec": 0.1, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0, "attempt": 1}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 3, "state": "SCANNING", "detail": "attempt 1/2", "wall_elapsed_sec": 0.170428, "sim_elapsed_sec": 0.2, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0, "attempt": 1, "direction": 1.0}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 4, "state": "SCANNING", "detail": "attempt 1, rotation 0.55 rad", "wall_elapsed_sec": 0.924198, "sim_elapsed_sec": 0.9, "phase_wall_sec": 0.753771, "phase_sim_sec": 0.7, "attempt": 1, "score": 0.213, "beams": 170, "in_map": 0.806, "covariance": [6.526, 3.994, 8.166], "good_scans": 0}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 5, "state": "SCANNING", "detail": "attempt 1, rotation 1.08 rad", "wall_elapsed_sec": 1.427151, "sim_elapsed_sec": 1.4, "phase_wall_sec": 1.256724, "phase_sim_sec": 1.2, "attempt": 1, "score": 0.422, "beams": 169, "in_map": 0.876, "covariance": [2.504, 1.666, 2.344], "good_scans": 0}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 6, "state": "CONFIRMING", "detail": "first acceptable AMCL update", "wall_elapsed_sec": 1.879834, "sim_elapsed_sec": 1.9, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0, "attempt": 1, "required_good_scans": 3}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 7, "state": "CONFIRMING", "detail": "attempt 1, rotation 1.60 rad", "wall_elapsed_sec": 1.930762, "sim_elapsed_sec": 1.9, "phase_wall_sec": 0.050928, "phase_sim_sec": 0.0, "attempt": 1, "score": 0.628, "beams": 170, "in_map": 0.847, "covariance": [0.085, 0.065, 0.076], "good_scans": 1}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 8, "state": "STOPPING_ATTEMPT", "detail": "stopping after attempt 1", "wall_elapsed_sec": 2.082212, "sim_elapsed_sec": 2.1, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0, "attempt": 1, "attempt_success": true}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 9, "state": "CLEARING_COSTMAPS", "detail": "clearing global and local costmaps", "wall_elapsed_sec": 2.5345, "sim_elapsed_sec": 2.5, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 10, "state": "FINAL_STOPPING", "detail": "publishing final zero-velocity commands", "wall_elapsed_sec": 2.537333, "sim_elapsed_sec": 2.5, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---
+{"schema_version": 2, "run_id": 16, "event_index": 11, "state": "SUCCEEDED", "detail": "converged after 1.76 rad; score=0.612, variance=(0.016, 0.020, 0.029)", "wall_elapsed_sec": 2.688566, "sim_elapsed_sec": 2.7, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---

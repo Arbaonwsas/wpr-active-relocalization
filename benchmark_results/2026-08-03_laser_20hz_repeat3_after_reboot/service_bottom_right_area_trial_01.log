@@ -1,0 +1,4 @@
+requester: making request: std_srvs.srv.Trigger_Request()
+
+response:
+std_srvs.srv.Trigger_Response(success=True, message='converged after 2.94 rad; score=0.952, variance=(0.284, 0.057, 0.028); stationary quality confirmed; score=0.980, variance=(0.096, 0.023, 0.011)')

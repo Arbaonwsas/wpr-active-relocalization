@@ -29,6 +29,7 @@ REPORTED_PHASES = (
     "TRANSLATING",
     "TRANSLATION_SKIPPED",
     "STOPPING_ATTEMPT",
+    "VERIFYING_STATIONARY",
     "CLEARING_COSTMAPS",
     "FINAL_STOPPING",
 )
@@ -276,18 +277,20 @@ def write_markdown(path, rows, started_at, repetitions):
         (
             "| Location | Trial | Result | Service wall (s) | Sim (s) | "
             "Prepare | Init | Scan | Confirm | Translate | Attempt stop | "
-            "Clear maps | Final stop | Attempts | Pos. error (m) |"
+            "Stationary check | Clear maps | Final stop | Attempts | "
+            "Pos. error (m) |"
         ),
         (
             "|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|"
-            "---:|---:|---:|---:|"
+            "---:|---:|---:|---:|---:|"
         ),
     ]
     for row in rows:
         if "wall_sec" not in row:
             lines.append(
                 f"| {row['location']} | {row['trial']} | harness error | "
-                "- | - | - | - | - | - | - | - | - | - | - | - |"
+                "- | - | - | - | - | - | - | - | - | - | - | - | "
+                "- |"
             )
             continue
         phase_values = [
@@ -494,6 +497,9 @@ def benchmark_case(
             stdout=monitor_file,
             stderr=subprocess.STDOUT,
         )
+        # Allow the CLI subscriber to match the transient-local publisher
+        # before the fast recovery service emits PREPARING.
+        time.sleep(0.2)
         sim_start = clock_seconds()
         wall_start = time.monotonic()
         response = run(
@@ -767,7 +773,11 @@ def main():
     with (output_dir / "results.csv").open(
         "w", newline="", encoding="utf-8"
     ) as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=fieldnames,
+            lineterminator="\n",
+        )
         writer.writeheader()
         writer.writerows(rows)
 
@@ -788,7 +798,11 @@ def main():
     with (output_dir / "phase_timings.csv").open(
         "w", newline="", encoding="utf-8"
     ) as phase_file:
-        writer = csv.DictWriter(phase_file, fieldnames=phase_fieldnames)
+        writer = csv.DictWriter(
+            phase_file,
+            fieldnames=phase_fieldnames,
+            lineterminator="\n",
+        )
         writer.writeheader()
         writer.writerows(phase_rows)
 

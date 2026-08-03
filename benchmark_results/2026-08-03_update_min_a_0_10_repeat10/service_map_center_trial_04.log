@@ -1,0 +1,5 @@
+waiting for service to become available...
+requester: making request: std_srvs.srv.Trigger_Request()
+
+response:
+std_srvs.srv.Trigger_Response(success=True, message='converged after 1.56 rad; score=0.606, variance=(0.032, 0.021, 0.018)')

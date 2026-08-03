@@ -1,0 +1,218 @@
+location,trial,phase,occurrence,attempt,detail,start_wall_sec,end_wall_sec,duration_wall_sec,start_sim_sec,end_sim_sec,duration_sim_sec
+top_left_room,1,PREPARING,1,,canceling navigation and stopping robot,3.1e-05,0.152321,0.15229,0.0,0.1,0.1
+top_left_room,1,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152321,0.170817,0.018496,0.1,0.1,0.0
+top_left_room,1,SCANNING,1,1,attempt 1/2,0.170817,3.285893,3.115076,0.1,3.3,3.2
+top_left_room,1,CONFIRMING,1,1,first acceptable AMCL update,3.285893,3.487022,0.201129,3.3,3.5,0.2
+top_left_room,1,STOPPING_ATTEMPT,1,1,stopping after attempt 1,3.487022,3.989114,0.502092,3.5,4.0,0.5
+top_left_room,1,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.989114,3.992379,0.003265,4.0,4.0,0.0
+top_left_room,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.992379,4.143132,0.150753,4.0,4.1,0.1
+top_left_room,2,PREPARING,1,,canceling navigation and stopping robot,4e-05,0.152633,0.152593,0.0,0.1,0.1
+top_left_room,2,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152633,0.169789,0.017156,0.1,0.1,0.0
+top_left_room,2,SCANNING,1,1,attempt 1/2,0.169789,6.199771,6.029982,0.1,6.2,6.1
+top_left_room,2,CONFIRMING,1,1,first acceptable AMCL update,6.199771,6.400818,0.201047,6.2,6.4,0.2
+top_left_room,2,STOPPING_ATTEMPT,1,1,stopping after attempt 1,6.400818,6.902698,0.50188,6.4,6.9,0.5
+top_left_room,2,CLEARING_COSTMAPS,1,,clearing global and local costmaps,6.902698,6.905084,0.002386,6.9,6.9,0.0
+top_left_room,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,6.905084,7.055758,0.150674,6.9,7.0,0.1
+top_left_room,3,PREPARING,1,,canceling navigation and stopping robot,3.2e-05,0.152233,0.152201,0.0,0.2,0.2
+top_left_room,3,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152233,0.169344,0.017111,0.2,0.2,0.0
+top_left_room,3,SCANNING,1,1,attempt 1/2,0.169344,5.599209,5.429865,0.2,5.6,5.4
+top_left_room,3,CONFIRMING,1,1,first acceptable AMCL update,5.599209,5.800047,0.200838,5.6,5.8,0.2
+top_left_room,3,SCANNING,2,1,quality confirmation reset,5.800047,5.850869,0.050822,5.8,5.8,0.0
+top_left_room,3,CONFIRMING,2,1,first acceptable AMCL update,5.850869,6.052308,0.201439,5.8,6.0,0.2
+top_left_room,3,STOPPING_ATTEMPT,1,1,stopping after attempt 1,6.052308,6.504217,0.451909,6.0,6.5,0.5
+top_left_room,3,CLEARING_COSTMAPS,1,,clearing global and local costmaps,6.504217,6.506664,0.002447,6.5,6.5,0.0
+top_left_room,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,6.506664,6.657768,0.151104,6.5,6.7,0.2
+top_left_room,4,PREPARING,1,,canceling navigation and stopping robot,1.9e-05,0.152076,0.152057,0.0,0.2,0.2
+top_left_room,4,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152076,0.168696,0.01662,0.2,0.2,0.0
+top_left_room,4,SCANNING,1,1,attempt 1/2,0.168696,2.931031,2.762335,0.2,2.9,2.7
+top_left_room,4,CONFIRMING,1,1,first acceptable AMCL update,2.931031,3.131915,0.200884,2.9,3.1,0.2
+top_left_room,4,STOPPING_ATTEMPT,1,1,stopping after attempt 1,3.131915,3.584011,0.452096,3.1,3.6,0.5
+top_left_room,4,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.584011,3.587339,0.003328,3.6,3.6,0.0
+top_left_room,4,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.587339,3.738202,0.150863,3.6,3.8,0.2
+top_left_room,5,PREPARING,1,,canceling navigation and stopping robot,2e-05,0.151934,0.151914,0.0,0.2,0.2
+top_left_room,5,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151934,0.169463,0.017529,0.2,0.2,0.0
+top_left_room,5,SCANNING,1,1,attempt 1/2,0.169463,5.446506,5.277043,0.2,5.5,5.3
+top_left_room,5,CONFIRMING,1,1,first acceptable AMCL update,5.446506,5.647812,0.201306,5.5,5.7,0.2
+top_left_room,5,SCANNING,2,1,quality confirmation reset,5.647812,5.949906,0.302094,5.7,6.0,0.3
+top_left_room,5,CONFIRMING,2,1,first acceptable AMCL update,5.949906,6.050636,0.10073,6.0,6.1,0.1
+top_left_room,5,SCANNING,3,1,quality confirmation reset,6.050636,6.453089,0.402453,6.1,6.5,0.4
+top_left_room,5,CONFIRMING,3,1,first acceptable AMCL update,6.453089,6.654648,0.201559,6.5,6.7,0.2
+top_left_room,5,STOPPING_ATTEMPT,1,1,stopping after attempt 1,6.654648,7.156851,0.502203,6.7,7.2,0.5
+top_left_room,5,CLEARING_COSTMAPS,1,,clearing global and local costmaps,7.156851,7.15956,0.002709,7.2,7.2,0.0
+top_left_room,5,FINAL_STOPPING,1,,publishing final zero-velocity commands,7.15956,7.310256,0.150696,7.2,7.3,0.1
+top_left_room,6,PREPARING,1,,canceling navigation and stopping robot,3.1e-05,0.151901,0.15187,0.0,0.1,0.1
+top_left_room,6,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151901,0.16948,0.017579,0.1,0.1,0.0
+top_left_room,6,SCANNING,1,1,attempt 1/2,0.16948,3.183662,3.014182,0.1,3.2,3.1
+top_left_room,6,CONFIRMING,1,1,first acceptable AMCL update,3.183662,3.384782,0.20112,3.2,3.4,0.2
+top_left_room,6,STOPPING_ATTEMPT,1,1,stopping after attempt 1,3.384782,3.836428,0.451646,3.4,3.8,0.4
+top_left_room,6,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.836428,3.838767,0.002339,3.8,3.8,0.0
+top_left_room,6,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.838767,3.989541,0.150774,3.8,4.0,0.2
+top_left_room,7,PREPARING,1,,canceling navigation and stopping robot,2.1e-05,0.151991,0.15197,0.0,0.1,0.1
+top_left_room,7,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151991,0.169954,0.017963,0.1,0.1,0.0
+top_left_room,7,SCANNING,1,1,attempt 1/2,0.169954,4.187921,4.017967,0.1,4.2,4.1
+top_left_room,7,CONFIRMING,1,1,first acceptable AMCL update,4.187921,4.389053,0.201132,4.2,4.4,0.2
+top_left_room,7,STOPPING_ATTEMPT,1,1,stopping after attempt 1,4.389053,4.841325,0.452272,4.4,4.8,0.4
+top_left_room,7,CLEARING_COSTMAPS,1,,clearing global and local costmaps,4.841325,4.843757,0.002432,4.8,4.8,0.0
+top_left_room,7,FINAL_STOPPING,1,,publishing final zero-velocity commands,4.843757,4.994779,0.151022,4.8,5.0,0.2
+top_left_room,8,PREPARING,1,,canceling navigation and stopping robot,2.1e-05,0.151992,0.151971,0.0,0.2,0.2
+top_left_room,8,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151992,0.168376,0.016384,0.2,0.2,0.0
+top_left_room,8,SCANNING,1,1,attempt 1/2,0.168376,5.042262,4.873886,0.2,5.1,4.9
+top_left_room,8,CONFIRMING,1,1,first acceptable AMCL update,5.042262,5.243398,0.201136,5.1,5.3,0.2
+top_left_room,8,STOPPING_ATTEMPT,1,1,stopping after attempt 1,5.243398,5.695261,0.451863,5.3,5.7,0.4
+top_left_room,8,CLEARING_COSTMAPS,1,,clearing global and local costmaps,5.695261,5.698367,0.003106,5.7,5.7,0.0
+top_left_room,8,FINAL_STOPPING,1,,publishing final zero-velocity commands,5.698367,5.849086,0.150719,5.7,5.9,0.2
+top_left_room,9,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151743,0.169614,0.017871,0.1,0.1,0.0
+top_left_room,9,SCANNING,1,1,attempt 1/2,0.169614,6.00546,5.835846,0.1,6.0,5.9
+top_left_room,9,CONFIRMING,1,1,first acceptable AMCL update,6.00546,6.206969,0.201509,6.0,6.2,0.2
+top_left_room,9,STOPPING_ATTEMPT,1,1,stopping after attempt 1,6.206969,6.709537,0.502568,6.2,6.7,0.5
+top_left_room,9,CLEARING_COSTMAPS,1,,clearing global and local costmaps,6.709537,6.712371,0.002834,6.7,6.7,0.0
+top_left_room,9,FINAL_STOPPING,1,,publishing final zero-velocity commands,6.712371,6.863345,0.150974,6.7,6.8,0.1
+top_left_room,10,PREPARING,1,,canceling navigation and stopping robot,2e-05,0.1522,0.15218,0.0,0.1,0.1
+top_left_room,10,INITIALIZING,1,1,requesting AMCL global particle initialization,0.1522,0.169357,0.017157,0.1,0.1,0.0
+top_left_room,10,SCANNING,1,1,attempt 1/2,0.169357,2.781495,2.612138,0.1,2.7,2.6
+top_left_room,10,CONFIRMING,1,1,first acceptable AMCL update,2.781495,2.983505,0.20201,2.7,3.0,0.3
+top_left_room,10,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.983505,3.435143,0.451638,3.0,3.4,0.4
+top_left_room,10,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.435143,3.43758,0.002437,3.4,3.4,0.0
+top_left_room,10,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.43758,3.588414,0.150834,3.4,3.6,0.2
+map_center,1,PREPARING,1,,canceling navigation and stopping robot,2.2e-05,0.152052,0.15203,0.0,0.1,0.1
+map_center,1,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152052,0.169062,0.01701,0.1,0.1,0.0
+map_center,1,SCANNING,1,1,attempt 1/2,0.169062,1.92797,1.758908,0.1,1.9,1.8
+map_center,1,CONFIRMING,1,1,first acceptable AMCL update,1.92797,2.129803,0.201833,1.9,2.1,0.2
+map_center,1,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.129803,2.581871,0.452068,2.1,2.5,0.4
+map_center,1,CLEARING_COSTMAPS,1,,clearing global and local costmaps,2.581871,2.585266,0.003395,2.5,2.5,0.0
+map_center,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,2.585266,2.736093,0.150827,2.5,2.7,0.2
+map_center,2,PREPARING,1,,canceling navigation and stopping robot,3.1e-05,0.152643,0.152612,0.0,0.1,0.1
+map_center,2,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152643,0.171587,0.018944,0.1,0.1,0.0
+map_center,2,SCANNING,1,1,attempt 1/2,0.171587,3.494883,3.323296,0.1,3.5,3.4
+map_center,2,CONFIRMING,1,1,first acceptable AMCL update,3.494883,3.696342,0.201459,3.5,3.7,0.2
+map_center,2,STOPPING_ATTEMPT,1,1,stopping after attempt 1,3.696342,4.148971,0.452629,3.7,4.1,0.4
+map_center,2,CLEARING_COSTMAPS,1,,clearing global and local costmaps,4.148971,4.152066,0.003095,4.1,4.1,0.0
+map_center,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,4.152066,4.30322,0.151154,4.1,4.3,0.2
+map_center,3,PREPARING,1,,canceling navigation and stopping robot,2.3e-05,0.152197,0.152174,0.0,0.1,0.1
+map_center,3,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152197,0.169717,0.01752,0.1,0.1,0.0
+map_center,3,SCANNING,1,1,attempt 1/2,0.169717,2.178668,2.008951,0.1,2.1,2.0
+map_center,3,CONFIRMING,1,1,first acceptable AMCL update,2.178668,2.379615,0.200947,2.1,2.3,0.2
+map_center,3,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.379615,2.831252,0.451637,2.3,2.8,0.5
+map_center,3,CLEARING_COSTMAPS,1,,clearing global and local costmaps,2.831252,2.833528,0.002276,2.8,2.8,0.0
+map_center,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,2.833528,2.984137,0.150609,2.8,3.0,0.2
+map_center,4,PREPARING,1,,canceling navigation and stopping robot,2.1e-05,0.151843,0.151822,0.0,0.2,0.2
+map_center,4,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151843,0.169392,0.017549,0.2,0.2,0.0
+map_center,4,SCANNING,1,1,attempt 1/2,0.169392,1.678034,1.508642,0.2,1.7,1.5
+map_center,4,CONFIRMING,1,1,first acceptable AMCL update,1.678034,1.879459,0.201425,1.7,1.9,0.2
+map_center,4,STOPPING_ATTEMPT,1,1,stopping after attempt 1,1.879459,2.33122,0.451761,1.9,2.3,0.4
+map_center,4,CLEARING_COSTMAPS,1,,clearing global and local costmaps,2.33122,2.333964,0.002744,2.3,2.3,0.0
+map_center,4,FINAL_STOPPING,1,,publishing final zero-velocity commands,2.333964,2.484782,0.150818,2.3,2.5,0.2
+map_center,5,PREPARING,1,,canceling navigation and stopping robot,2.1e-05,0.151931,0.15191,0.0,0.1,0.1
+map_center,5,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151931,0.170288,0.018357,0.1,0.2,0.1
+map_center,5,SCANNING,1,1,attempt 1/2,0.170288,2.681898,2.51161,0.2,2.7,2.5
+map_center,5,CONFIRMING,1,1,first acceptable AMCL update,2.681898,2.882986,0.201088,2.7,2.9,0.2
+map_center,5,SCANNING,2,1,quality confirmation reset,2.882986,3.084617,0.201631,2.9,3.1,0.2
+map_center,5,CONFIRMING,2,1,first acceptable AMCL update,3.084617,3.286079,0.201462,3.1,3.3,0.2
+map_center,5,STOPPING_ATTEMPT,1,1,stopping after attempt 1,3.286079,3.738335,0.452256,3.3,3.7,0.4
+map_center,5,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.738335,3.741324,0.002989,3.7,3.7,0.0
+map_center,5,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.741324,3.892601,0.151277,3.7,3.9,0.2
+map_center,6,PREPARING,1,,canceling navigation and stopping robot,2.1e-05,0.152,0.151979,0.0,0.2,0.2
+map_center,6,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152,0.169096,0.017096,0.2,0.2,0.0
+map_center,6,SCANNING,1,1,attempt 1/2,0.169096,1.625964,1.456868,0.2,1.7,1.5
+map_center,6,CONFIRMING,1,1,first acceptable AMCL update,1.625964,1.827114,0.20115,1.7,1.9,0.2
+map_center,6,STOPPING_ATTEMPT,1,1,stopping after attempt 1,1.827114,2.278974,0.45186,1.9,2.3,0.4
+map_center,6,CLEARING_COSTMAPS,1,,clearing global and local costmaps,2.278974,2.281888,0.002914,2.3,2.3,0.0
+map_center,6,FINAL_STOPPING,1,,publishing final zero-velocity commands,2.281888,2.432954,0.151066,2.3,2.5,0.2
+map_center,7,PREPARING,1,,canceling navigation and stopping robot,2.2e-05,0.152775,0.152753,0.0,0.2,0.2
+map_center,7,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152775,0.169625,0.01685,0.2,0.2,0.0
+map_center,7,SCANNING,1,1,attempt 1/2,0.169625,3.035187,2.865562,0.2,3.1,2.9
+map_center,7,CONFIRMING,1,1,first acceptable AMCL update,3.035187,3.236553,0.201366,3.1,3.3,0.2
+map_center,7,STOPPING_ATTEMPT,1,1,stopping after attempt 1,3.236553,3.738991,0.502438,3.3,3.8,0.5
+map_center,7,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.738991,3.742002,0.003011,3.8,3.8,0.0
+map_center,7,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.742002,3.893067,0.151065,3.8,3.9,0.1
+map_center,8,PREPARING,1,,canceling navigation and stopping robot,3.2e-05,0.15283,0.152798,0.0,0.1,0.1
+map_center,8,INITIALIZING,1,1,requesting AMCL global particle initialization,0.15283,0.172197,0.019367,0.1,0.1,0.0
+map_center,8,SCANNING,1,1,attempt 1/2,0.172197,2.482909,2.310712,0.1,2.5,2.4
+map_center,8,CONFIRMING,1,1,first acceptable AMCL update,2.482909,2.684039,0.20113,2.5,2.7,0.2
+map_center,8,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.684039,3.13576,0.451721,2.7,3.1,0.4
+map_center,8,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.13576,3.138033,0.002273,3.1,3.1,0.0
+map_center,8,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.138033,3.288912,0.150879,3.1,3.3,0.2
+map_center,9,PREPARING,1,,canceling navigation and stopping robot,2.1e-05,0.151787,0.151766,0.0,0.1,0.1
+map_center,9,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151787,0.170539,0.018752,0.1,0.1,0.0
+map_center,9,SCANNING,1,1,attempt 1/2,0.170539,2.179918,2.009379,0.1,2.1,2.0
+map_center,9,CONFIRMING,1,1,first acceptable AMCL update,2.179918,2.380898,0.20098,2.1,2.3,0.2
+map_center,9,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.380898,2.883274,0.502376,2.3,2.9,0.6
+map_center,9,CLEARING_COSTMAPS,1,,clearing global and local costmaps,2.883274,2.885721,0.002447,2.9,2.9,0.0
+map_center,9,FINAL_STOPPING,1,,publishing final zero-velocity commands,2.885721,3.036309,0.150588,2.9,3.0,0.1
+map_center,10,PREPARING,1,,canceling navigation and stopping robot,3.1e-05,0.152311,0.15228,0.0,0.1,0.1
+map_center,10,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152311,0.169816,0.017505,0.1,0.1,0.0
+map_center,10,SCANNING,1,1,attempt 1/2,0.169816,2.179407,2.009591,0.1,2.1,2.0
+map_center,10,CONFIRMING,1,1,first acceptable AMCL update,2.179407,2.380549,0.201142,2.1,2.3,0.2
+map_center,10,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.380549,2.882491,0.501942,2.3,2.8,0.5
+map_center,10,CLEARING_COSTMAPS,1,,clearing global and local costmaps,2.882491,2.884769,0.002278,2.8,2.9,0.1
+map_center,10,FINAL_STOPPING,1,,publishing final zero-velocity commands,2.884769,3.035773,0.151004,2.9,3.0,0.1
+bottom_right_area,1,PREPARING,1,,canceling navigation and stopping robot,1.9e-05,0.152059,0.15204,0.0,0.1,0.1
+bottom_right_area,1,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152059,0.169093,0.017034,0.1,0.2,0.1
+bottom_right_area,1,SCANNING,1,1,attempt 1/2,0.169093,2.68307,2.513977,0.2,2.7,2.5
+bottom_right_area,1,CONFIRMING,1,1,first acceptable AMCL update,2.68307,2.884486,0.201416,2.7,2.9,0.2
+bottom_right_area,1,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.884486,3.386887,0.502401,2.9,3.4,0.5
+bottom_right_area,1,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.386887,3.389486,0.002599,3.4,3.4,0.0
+bottom_right_area,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.389486,3.540189,0.150703,3.4,3.5,0.1
+bottom_right_area,2,PREPARING,1,,canceling navigation and stopping robot,2.2e-05,0.151892,0.15187,0.0,0.2,0.2
+bottom_right_area,2,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151892,0.169589,0.017697,0.2,0.2,0.0
+bottom_right_area,2,SCANNING,1,1,attempt 1/2,0.169589,2.783508,2.613919,0.2,2.8,2.6
+bottom_right_area,2,CONFIRMING,1,1,first acceptable AMCL update,2.783508,2.98503,0.201522,2.8,3.0,0.2
+bottom_right_area,2,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.98503,3.487134,0.502104,3.0,3.5,0.5
+bottom_right_area,2,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.487134,3.490161,0.003027,3.5,3.5,0.0
+bottom_right_area,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.490161,3.640989,0.150828,3.5,3.6,0.1
+bottom_right_area,3,PREPARING,1,,canceling navigation and stopping robot,3.5e-05,0.153911,0.153876,0.0,0.2,0.2
+bottom_right_area,3,INITIALIZING,1,1,requesting AMCL global particle initialization,0.153911,0.171795,0.017884,0.2,0.2,0.0
+bottom_right_area,3,SCANNING,1,1,attempt 1/2,0.171795,2.435125,2.26333,0.2,2.5,2.3
+bottom_right_area,3,CONFIRMING,1,1,first acceptable AMCL update,2.435125,2.636651,0.201526,2.5,2.7,0.2
+bottom_right_area,3,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.636651,3.13915,0.502499,2.7,3.2,0.5
+bottom_right_area,3,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.13915,3.142601,0.003451,3.2,3.2,0.0
+bottom_right_area,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.142601,3.293583,0.150982,3.2,3.3,0.1
+bottom_right_area,4,PREPARING,1,,canceling navigation and stopping robot,3.3e-05,0.152742,0.152709,0.0,0.1,0.1
+bottom_right_area,4,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152742,0.170086,0.017344,0.1,0.1,0.0
+bottom_right_area,4,SCANNING,1,1,attempt 1/2,0.170086,2.581777,2.411691,0.1,2.6,2.5
+bottom_right_area,4,CONFIRMING,1,1,first acceptable AMCL update,2.581777,2.782797,0.20102,2.6,2.8,0.2
+bottom_right_area,4,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.782797,3.23428,0.451483,2.8,3.2,0.4
+bottom_right_area,4,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.23428,3.236527,0.002247,3.2,3.2,0.0
+bottom_right_area,4,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.236527,3.387386,0.150859,3.2,3.4,0.2
+bottom_right_area,5,PREPARING,1,,canceling navigation and stopping robot,2e-05,0.15173,0.15171,0.0,0.1,0.1
+bottom_right_area,5,INITIALIZING,1,1,requesting AMCL global particle initialization,0.15173,0.171682,0.019952,0.1,0.2,0.1
+bottom_right_area,5,SCANNING,1,1,attempt 1/2,0.171682,6.911472,6.73979,0.2,6.9,6.7
+bottom_right_area,5,CONFIRMING,1,1,first acceptable AMCL update,6.911472,7.063848,0.152376,6.9,7.0,0.1
+bottom_right_area,5,STOPPING_ATTEMPT,1,1,stopping after attempt 1,7.063848,7.515436,0.451588,7.0,7.5,0.5
+bottom_right_area,5,CLEARING_COSTMAPS,1,,clearing global and local costmaps,7.515436,7.518394,0.002958,7.5,7.5,0.0
+bottom_right_area,5,FINAL_STOPPING,1,,publishing final zero-velocity commands,7.518394,7.669264,0.15087,7.5,7.7,0.2
+bottom_right_area,6,PREPARING,1,,canceling navigation and stopping robot,3.1e-05,0.152907,0.152876,0.0,0.2,0.2
+bottom_right_area,6,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152907,0.16953,0.016623,0.2,0.2,0.0
+bottom_right_area,6,SCANNING,1,1,attempt 1/2,0.16953,3.234462,3.064932,0.2,3.3,3.1
+bottom_right_area,6,CONFIRMING,1,1,first acceptable AMCL update,3.234462,3.435897,0.201435,3.3,3.5,0.2
+bottom_right_area,6,STOPPING_ATTEMPT,1,1,stopping after attempt 1,3.435897,3.887631,0.451734,3.5,3.9,0.4
+bottom_right_area,6,CLEARING_COSTMAPS,1,,clearing global and local costmaps,3.887631,3.890219,0.002588,3.9,3.9,0.0
+bottom_right_area,6,FINAL_STOPPING,1,,publishing final zero-velocity commands,3.890219,4.041093,0.150874,3.9,4.1,0.2
+bottom_right_area,7,PREPARING,1,,canceling navigation and stopping robot,4.9e-05,0.151986,0.151937,0.0,0.1,0.1
+bottom_right_area,7,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151986,0.169505,0.017519,0.1,0.1,0.0
+bottom_right_area,7,SCANNING,1,1,attempt 1/2,0.169505,1.828672,1.659167,0.1,1.8,1.7
+bottom_right_area,7,CONFIRMING,1,1,first acceptable AMCL update,1.828672,1.981375,0.152703,1.8,1.9,0.1
+bottom_right_area,7,STOPPING_ATTEMPT,1,1,stopping after attempt 1,1.981375,2.433102,0.451727,1.9,2.4,0.5
+bottom_right_area,7,CLEARING_COSTMAPS,1,,clearing global and local costmaps,2.433102,2.435695,0.002593,2.4,2.4,0.0
+bottom_right_area,7,FINAL_STOPPING,1,,publishing final zero-velocity commands,2.435695,2.586446,0.150751,2.4,2.6,0.2
+bottom_right_area,8,PREPARING,1,,canceling navigation and stopping robot,2e-05,0.151783,0.151763,0.0,0.1,0.1
+bottom_right_area,8,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151783,0.169424,0.017641,0.1,0.2,0.1
+bottom_right_area,8,SCANNING,1,1,attempt 1/2,0.169424,2.278665,2.109241,0.2,2.3,2.1
+bottom_right_area,8,CONFIRMING,1,1,first acceptable AMCL update,2.278665,2.480035,0.20137,2.3,2.5,0.2
+bottom_right_area,8,STOPPING_ATTEMPT,1,1,stopping after attempt 1,2.480035,2.931905,0.45187,2.5,2.9,0.4
+bottom_right_area,8,CLEARING_COSTMAPS,1,,clearing global and local costmaps,2.931905,2.934609,0.002704,2.9,2.9,0.0
+bottom_right_area,8,FINAL_STOPPING,1,,publishing final zero-velocity commands,2.934609,3.085329,0.15072,2.9,3.1,0.2
+bottom_right_area,9,PREPARING,1,,canceling navigation and stopping robot,3.1e-05,0.151805,0.151774,0.0,0.2,0.2
+bottom_right_area,9,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151805,0.16869,0.016885,0.2,0.2,0.0
+bottom_right_area,9,SCANNING,1,1,attempt 1/2,0.16869,4.393994,4.225304,0.2,4.4,4.2
+bottom_right_area,9,CONFIRMING,1,1,first acceptable AMCL update,4.393994,4.595356,0.201362,4.4,4.6,0.2
+bottom_right_area,9,STOPPING_ATTEMPT,1,1,stopping after attempt 1,4.595356,5.047098,0.451742,4.6,5.0,0.4
+bottom_right_area,9,CLEARING_COSTMAPS,1,,clearing global and local costmaps,5.047098,5.050117,0.003019,5.0,5.0,0.0
+bottom_right_area,9,FINAL_STOPPING,1,,publishing final zero-velocity commands,5.050117,5.201178,0.151061,5.0,5.2,0.2
+bottom_right_area,10,PREPARING,1,,canceling navigation and stopping robot,2e-05,0.151844,0.151824,0.0,0.1,0.1
+bottom_right_area,10,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151844,0.168772,0.016928,0.1,0.1,0.0
+bottom_right_area,10,SCANNING,1,1,attempt 1/2,0.168772,3.88978,3.721008,0.1,3.8,3.7
+bottom_right_area,10,CONFIRMING,1,1,first acceptable AMCL update,3.88978,4.091023,0.201243,3.8,4.0,0.2
+bottom_right_area,10,STOPPING_ATTEMPT,1,1,stopping after attempt 1,4.091023,4.543184,0.452161,4.0,4.5,0.5
+bottom_right_area,10,CLEARING_COSTMAPS,1,,clearing global and local costmaps,4.543184,4.545801,0.002617,4.5,4.5,0.0
+bottom_right_area,10,FINAL_STOPPING,1,,publishing final zero-velocity commands,4.545801,4.69661,0.150809,4.5,4.7,0.2

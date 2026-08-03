@@ -1,0 +1,24 @@
+location,trial,phase,occurrence,attempt,detail,start_wall_sec,end_wall_sec,duration_wall_sec,start_sim_sec,end_sim_sec,duration_sim_sec
+top_left_room,1,PREPARING,1,,canceling navigation and stopping robot,3e-05,0.152209,0.152179,0.0,0.1,0.1
+top_left_room,1,INITIALIZING,1,1,requesting AMCL global particle initialization,0.152209,0.178687,0.026478,0.1,0.1,0.0
+top_left_room,1,SCANNING,1,1,attempt 1/2,0.178687,5.505719,5.327032,0.1,5.5,5.4
+top_left_room,1,CONFIRMING,1,1,first acceptable AMCL update,5.505719,5.606391,0.100672,5.5,5.6,0.1
+top_left_room,1,SCANNING,2,1,quality confirmation reset,5.606391,5.707118,0.100727,5.6,5.7,0.1
+top_left_room,1,CONFIRMING,2,1,first acceptable AMCL update,5.707118,5.908599,0.201481,5.7,5.9,0.2
+top_left_room,1,STOPPING_ATTEMPT,1,1,stopping after attempt 1,5.908599,6.411014,0.502415,5.9,6.4,0.5
+top_left_room,1,CLEARING_COSTMAPS,1,,clearing global and local costmaps,6.411014,6.413542,0.002528,6.4,6.4,0.0
+top_left_room,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,6.413542,6.564424,0.150882,6.4,6.5,0.1
+top_left_room,2,PREPARING,1,,canceling navigation and stopping robot,2.8e-05,0.151984,0.151956,0.0,0.1,0.1
+top_left_room,2,INITIALIZING,1,1,requesting AMCL global particle initialization,0.151984,0.177641,0.025657,0.1,0.2,0.1
+top_left_room,2,SCANNING,1,1,attempt 1/2,0.177641,4.602245,4.424604,0.2,4.6,4.4
+top_left_room,2,CONFIRMING,1,1,first acceptable AMCL update,4.602245,4.803522,0.201277,4.6,4.8,0.2
+top_left_room,2,STOPPING_ATTEMPT,1,1,stopping after attempt 1,4.803522,5.255768,0.452246,4.8,5.2,0.4
+top_left_room,2,CLEARING_COSTMAPS,1,,clearing global and local costmaps,5.255768,5.259312,0.003544,5.2,5.2,0.0
+top_left_room,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,5.259312,5.410382,0.15107,5.2,5.4,0.2
+top_left_room,3,PREPARING,1,,canceling navigation and stopping robot,1.9e-05,0.1517,0.151681,0.0,0.1,0.1
+top_left_room,3,INITIALIZING,1,1,requesting AMCL global particle initialization,0.1517,0.177658,0.025958,0.1,0.1,0.0
+top_left_room,3,SCANNING,1,1,attempt 1/2,0.177658,4.80166,4.624002,0.1,4.8,4.7
+top_left_room,3,CONFIRMING,1,1,first acceptable AMCL update,4.80166,5.003317,0.201657,4.8,5.0,0.2
+top_left_room,3,STOPPING_ATTEMPT,1,1,stopping after attempt 1,5.003317,5.505372,0.502055,5.0,5.5,0.5
+top_left_room,3,CLEARING_COSTMAPS,1,,clearing global and local costmaps,5.505372,5.50746,0.002088,5.5,5.5,0.0
+top_left_room,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,5.50746,5.658225,0.150765,5.5,5.6,0.1

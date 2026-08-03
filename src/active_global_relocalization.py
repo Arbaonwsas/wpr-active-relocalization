@@ -66,6 +66,8 @@ class ActiveGlobalRelocalization(Node):
         self.declare_parameter('stop_speed_threshold', 0.01)
         self.declare_parameter('stop_consecutive_samples', 3)
         self.declare_parameter('stop_minimum_commands', 3)
+        self.declare_parameter('stationary_good_scans', 2)
+        self.declare_parameter('stationary_confirmation_timeout', 2.0)
         self.declare_parameter('translation_distance', 0.55)
         self.declare_parameter('translation_speed', 0.16)
         self.declare_parameter('translation_clearance', 0.45)
@@ -109,6 +111,12 @@ class ActiveGlobalRelocalization(Node):
         )
         self._stop_minimum_commands = max(
             1, self._integer('stop_minimum_commands')
+        )
+        self._stationary_good_scans = max(
+            1, self._integer('stationary_good_scans')
+        )
+        self._stationary_confirmation_timeout = max(
+            0.5, self._double('stationary_confirmation_timeout')
         )
         self._translation_distance = max(
             0.0, self._double('translation_distance')
@@ -211,6 +219,11 @@ class ActiveGlobalRelocalization(Node):
         self._global_init_client = self.create_client(
             Empty,
             '/reinitialize_global_localization',
+            callback_group=self._callback_group,
+        )
+        self._nomotion_update_client = self.create_client(
+            Empty,
+            '/request_nomotion_update',
             callback_group=self._callback_group,
         )
         self._cancel_client = self.create_client(
@@ -540,6 +553,68 @@ class ActiveGlobalRelocalization(Node):
             and quality.yaw_variance <= self._max_yaw_variance
         )
 
+    def _confirm_stationary_quality(
+        self,
+        attempt: int,
+        global_deadline: float,
+    ) -> tuple[bool, str]:
+        self._publish_status(
+            'VERIFYING_STATIONARY',
+            'requesting AMCL no-motion quality updates',
+            attempt=attempt,
+            required_good_scans=self._stationary_good_scans,
+        )
+        verification_deadline = min(
+            global_deadline,
+            time.monotonic() + self._stationary_confirmation_timeout,
+        )
+        with self._data_lock:
+            last_pose_sequence = self._pose_sequence
+            last_quality_sequence = self._quality_sequence
+
+        good_scans = 0
+        while rclpy.ok() and time.monotonic() < verification_deadline:
+            remaining = verification_deadline - time.monotonic()
+            response = self._call_service(
+                self._nomotion_update_client,
+                Empty.Request(),
+                min(self._service_timeout, max(0.05, remaining)),
+            )
+            if response is None:
+                return False, 'AMCL no-motion update service unavailable'
+
+            while rclpy.ok() and time.monotonic() < verification_deadline:
+                with self._data_lock:
+                    quality = self._latest_quality
+                if (
+                    quality is not None
+                    and quality.sequence > last_quality_sequence
+                    and quality.pose_sequence > last_pose_sequence
+                ):
+                    last_quality_sequence = quality.sequence
+                    last_pose_sequence = quality.pose_sequence
+                    if not self._quality_is_good(quality):
+                        return False, (
+                            'stationary quality check failed; '
+                            f'score={quality.scan_score:.3f}, '
+                            f'variance=({quality.x_variance:.3f}, '
+                            f'{quality.y_variance:.3f}, '
+                            f'{quality.yaw_variance:.3f})'
+                        )
+                    good_scans += 1
+                    if good_scans >= self._stationary_good_scans:
+                        return True, (
+                            'stationary quality confirmed; '
+                            f'score={quality.scan_score:.3f}, '
+                            f'variance=({quality.x_variance:.3f}, '
+                            f'{quality.y_variance:.3f}, '
+                            f'{quality.yaw_variance:.3f})'
+                        )
+                    break
+                time.sleep(1.0 / self._control_frequency)
+
+        return False, 'stationary quality confirmation timed out'
+
     def _sector_clearance(self, scan: LaserScan, center: float) -> float:
         samples = []
         for index, measured_range in enumerate(scan.ranges):
@@ -793,15 +868,22 @@ class ActiveGlobalRelocalization(Node):
                 )
                 self._stop_robot(20)
                 if success:
+                    verified, verification_detail = (
+                        self._confirm_stationary_quality(attempt, deadline)
+                    )
+                    if not verified:
+                        success = False
+                        last_detail = verification_detail
+                if success:
                     self._publish_status(
                         'CLEARING_COSTMAPS',
                         'clearing global and local costmaps',
                     )
                     self._clear_costmaps()
                     response.success = True
-                    response.message = last_detail
+                    response.message = f'{last_detail}; {verification_detail}'
                     final_state = 'SUCCEEDED'
-                    final_detail = last_detail
+                    final_detail = response.message
                     return response
                 if time.monotonic() >= deadline:
                     break

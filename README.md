@@ -104,6 +104,8 @@ python3 scripts/benchmark_global_relocalization.py \
 算法阶段时间和暂停、传送、恢复 Gazebo、采集结果等实验夹具时间分开统计，
 因此后续优化时不会把测试脚本本身的等待误认为重定位耗时。
 
-当前第二轮优化后的三位置九次测试成功率为 `9/9`，平均恢复时间 `10.42 s`、
-P50 `9.47 s`、P95 `15.82 s`，完整数据见
-[第二轮优化结果](benchmark_results/2026-08-03_speed_1_5_translation_0_24_repeat3/README.md)。
+当前正式 10 Hz 三位置三十次测试成功率为 `30/30`，平均服务墙钟时间 `4.94 s`、
+P50 `4.36 s`、P95 `7.73 s`。停车后新增两次 AMCL 静止质量复核；仿真激光提高到
+20 Hz 后，三位置九次初步对照仍为 `9/9`，节点内部平均恢复由 `4.68 s` 降至
+`3.65 s`。完整参数 A/B、硬件利用率和下一阶段方向见
+[重定位时间优化记录](docs/relocalization_time_optimization.md)。
