@@ -113,6 +113,13 @@ def test_consecutive_mismatch_detects_lost_covariance() -> None:
     assert detector.update(0.90, 100, 1.0, 6.0, 7.0, 6.0)
 
 
+def test_consecutive_mismatch_accepts_external_validation_failure() -> None:
+    detector = ConsecutiveMismatchDetector(0.35, 0.65, 25, 2)
+
+    assert not detector.update(0.90, 100, 1.0, forced_mismatch=True)
+    assert detector.update(0.90, 100, 1.0, forced_mismatch=True)
+
+
 @pytest.mark.parametrize(
     "arguments",
     [(-0.1, 0.5, 10, 2), (0.5, 1.1, 10, 2), (0.5, 0.5, 0, 2),

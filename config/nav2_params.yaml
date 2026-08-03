@@ -382,6 +382,11 @@ active_global_relocalization:
     # jump. This gives continuous drag-and-release testing a deterministic cue.
     automatic_odom_jump_translation: 0.75
     automatic_odom_jump_yaw: 0.80
+    # Simulation only: planar_move odometry equals Gazebo world truth after a
+    # drag. Reject symmetric AMCL hypotheses that disagree with that truth.
+    simulation_odom_validation: True
+    simulation_max_odom_position_error: 0.75
+    simulation_max_odom_yaw_error: 0.60
     automatic_trigger_cooldown: 8.0
     translation_distance: 0.55
     translation_speed: 0.24

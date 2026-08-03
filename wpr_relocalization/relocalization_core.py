@@ -64,10 +64,12 @@ class ConsecutiveMismatchDetector:
         x_variance: float = 0.0,
         y_variance: float = 0.0,
         yaw_variance: float = 0.0,
+        forced_mismatch: bool = False,
     ) -> bool:
         enough_beams = beams_used >= self.minimum_beams
         mismatched = enough_beams and (
-            score < self.maximum_score
+            forced_mismatch
+            or score < self.maximum_score
             or in_map_fraction < self.minimum_in_map_fraction
             or x_variance > self.maximum_xy_variance
             or y_variance > self.maximum_xy_variance

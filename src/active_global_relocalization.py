@@ -47,6 +47,8 @@ class LocalizationQuality:
     x_variance: float
     y_variance: float
     yaw_variance: float
+    odom_position_error: float | None
+    odom_yaw_error: float | None
 
 
 class ActiveGlobalRelocalization(Node):
@@ -80,6 +82,9 @@ class ActiveGlobalRelocalization(Node):
         self.declare_parameter('automatic_suspect_required_ratio', 0.90)
         self.declare_parameter('automatic_odom_jump_translation', 0.75)
         self.declare_parameter('automatic_odom_jump_yaw', 0.80)
+        self.declare_parameter('simulation_odom_validation', False)
+        self.declare_parameter('simulation_max_odom_position_error', 0.75)
+        self.declare_parameter('simulation_max_odom_yaw_error', 0.60)
         self.declare_parameter('automatic_trigger_cooldown', 8.0)
         self.declare_parameter('translation_distance', 0.55)
         self.declare_parameter('translation_speed', 0.16)
@@ -165,6 +170,15 @@ class ActiveGlobalRelocalization(Node):
             ),
             maximum_yaw_jump=self._double('automatic_odom_jump_yaw'),
         )
+        self._simulation_odom_validation = self._boolean(
+            'simulation_odom_validation'
+        )
+        self._simulation_max_odom_position_error = max(
+            0.0, self._double('simulation_max_odom_position_error')
+        )
+        self._simulation_max_odom_yaw_error = max(
+            0.0, self._double('simulation_max_odom_yaw_error')
+        )
         self._translation_distance = max(
             0.0, self._double('translation_distance')
         )
@@ -216,6 +230,7 @@ class ActiveGlobalRelocalization(Node):
         self._phase_start_wall: float | None = None
         self._phase_start_sim: float | None = None
         self._automatic_trigger_pending = False
+        self._automatic_failure_latched = False
         self._pending_odom_jump: tuple[float, float] | None = None
         self._last_relocalization_end_wall = 0.0
 
@@ -360,6 +375,7 @@ class ActiveGlobalRelocalization(Node):
                 and not self._run_lock.locked()
             ):
                 self._pending_odom_jump = (translation, yaw_change)
+                self._automatic_failure_latched = False
             self._latest_odom_yaw = yaw
             self._latest_odom_position = position
             self._latest_speed_norm = max(
@@ -377,6 +393,8 @@ class ActiveGlobalRelocalization(Node):
             field = self._map_field
             pose_message = self._latest_pose
             pose_sequence = self._pose_sequence
+            odom_position = self._latest_odom_position
+            odom_yaw = self._latest_odom_yaw
         laser_transform = self._lookup_laser_transform(message.header.frame_id)
         if field is None or pose_message is None or laser_transform is None:
             return
@@ -407,6 +425,14 @@ class ActiveGlobalRelocalization(Node):
             max_beams=self._score_maximum_beams,
         )
         covariance = pose_message.pose.covariance
+        odom_position_error = None
+        odom_yaw_error = None
+        if odom_position is not None and odom_yaw is not None:
+            odom_position_error = math.hypot(
+                base_pose[0] - odom_position[0],
+                base_pose[1] - odom_position[1],
+            )
+            odom_yaw_error = abs(normalize_angle(base_pose[2] - odom_yaw))
         with self._data_lock:
             self._quality_sequence += 1
             quality = LocalizationQuality(
@@ -418,6 +444,8 @@ class ActiveGlobalRelocalization(Node):
                 x_variance=max(0.0, covariance[0]),
                 y_variance=max(0.0, covariance[7]),
                 yaw_variance=max(0.0, covariance[35]),
+                odom_position_error=odom_position_error,
+                odom_yaw_error=odom_yaw_error,
             )
             self._latest_quality = quality
         self._quality_pub.publish(String(data=json.dumps(quality.__dict__)))
@@ -615,6 +643,22 @@ class ActiveGlobalRelocalization(Node):
             and quality.x_variance <= self._max_xy_variance
             and quality.y_variance <= self._max_xy_variance
             and quality.yaw_variance <= self._max_yaw_variance
+            and self._simulation_odom_is_consistent(quality)
+        )
+
+    def _simulation_odom_is_consistent(
+        self,
+        quality: LocalizationQuality,
+    ) -> bool:
+        if not self._simulation_odom_validation:
+            return True
+        return (
+            quality.odom_position_error is not None
+            and quality.odom_yaw_error is not None
+            and quality.odom_position_error
+            <= self._simulation_max_odom_position_error
+            and quality.odom_yaw_error
+            <= self._simulation_max_odom_yaw_error
         )
 
     def _consider_automatic_relocalization(
@@ -630,6 +674,12 @@ class ActiveGlobalRelocalization(Node):
 
         now = time.monotonic()
         with self._data_lock:
+            if self._automatic_failure_latched:
+                if self._quality_is_good(quality):
+                    self._automatic_failure_latched = False
+                elif self._pending_odom_jump is None:
+                    self._reset_mismatch_detectors()
+                    return
             cooling_down = (
                 now - self._last_relocalization_end_wall
                 < self._automatic_trigger_cooldown
@@ -640,6 +690,10 @@ class ActiveGlobalRelocalization(Node):
             odom_jump = self._pending_odom_jump
             hard_mismatch = False
             suspect_mismatch = False
+            simulation_mismatch = (
+                self._simulation_odom_validation
+                and not self._simulation_odom_is_consistent(quality)
+            )
             if odom_jump is None:
                 hard_mismatch = self._mismatch_detector.update(
                     quality.scan_score,
@@ -648,6 +702,7 @@ class ActiveGlobalRelocalization(Node):
                     quality.x_variance,
                     quality.y_variance,
                     quality.yaw_variance,
+                    forced_mismatch=simulation_mismatch,
                 )
                 suspect_mismatch = self._suspect_mismatch_detector.update(
                     quality.scan_score,
@@ -662,6 +717,21 @@ class ActiveGlobalRelocalization(Node):
                     f'yaw={odom_jump[1]:.2f} rad)'
                 )
                 self._pending_odom_jump = None
+            elif hard_mismatch and simulation_mismatch:
+                position_error = (
+                    'unavailable'
+                    if quality.odom_position_error is None
+                    else f'{quality.odom_position_error:.2f} m'
+                )
+                yaw_error = (
+                    'unavailable'
+                    if quality.odom_yaw_error is None
+                    else f'{quality.odom_yaw_error:.2f} rad'
+                )
+                trigger_reason = (
+                    'simulation odometry disagreement '
+                    f'(position={position_error}, yaw={yaw_error})'
+                )
             elif hard_mismatch:
                 trigger_reason = 'persistent hard mismatch'
             else:
@@ -691,8 +761,12 @@ class ActiveGlobalRelocalization(Node):
             self._execute_relocalization(response, trigger_source='automatic')
             result = f'Automatic relocalization result: {response.message}'
             if response.success:
+                with self._data_lock:
+                    self._automatic_failure_latched = False
                 self.get_logger().info(result)
             else:
+                with self._data_lock:
+                    self._automatic_failure_latched = True
                 self.get_logger().error(result)
         finally:
             with self._data_lock:
