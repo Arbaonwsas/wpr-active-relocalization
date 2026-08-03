@@ -30,6 +30,7 @@ from tf2_ros import Buffer, TransformException, TransformListener
 from wpr_relocalization.relocalization_core import (
     ConsecutiveMismatchDetector,
     LikelihoodField,
+    OdometryDiscontinuityDetector,
     WindowedMismatchDetector,
     normalize_angle,
     quaternion_to_yaw,
@@ -77,6 +78,8 @@ class ActiveGlobalRelocalization(Node):
         self.declare_parameter('automatic_suspect_score', 0.60)
         self.declare_parameter('automatic_suspect_window_scans', 40)
         self.declare_parameter('automatic_suspect_required_ratio', 0.90)
+        self.declare_parameter('automatic_odom_jump_translation', 0.75)
+        self.declare_parameter('automatic_odom_jump_yaw', 0.80)
         self.declare_parameter('automatic_trigger_cooldown', 8.0)
         self.declare_parameter('translation_distance', 0.55)
         self.declare_parameter('translation_speed', 0.16)
@@ -156,6 +159,12 @@ class ActiveGlobalRelocalization(Node):
                 'automatic_suspect_required_ratio'
             ),
         )
+        self._odom_discontinuity_detector = OdometryDiscontinuityDetector(
+            maximum_translation_jump=self._double(
+                'automatic_odom_jump_translation'
+            ),
+            maximum_yaw_jump=self._double('automatic_odom_jump_yaw'),
+        )
         self._translation_distance = max(
             0.0, self._double('translation_distance')
         )
@@ -207,6 +216,7 @@ class ActiveGlobalRelocalization(Node):
         self._phase_start_wall: float | None = None
         self._phase_start_sim: float | None = None
         self._automatic_trigger_pending = False
+        self._pending_odom_jump: tuple[float, float] | None = None
         self._last_relocalization_end_wall = 0.0
 
         status_qos = QoSProfile(depth=1)
@@ -336,12 +346,22 @@ class ActiveGlobalRelocalization(Node):
             orientation.z,
             orientation.w,
         )
+        position = (
+            message.pose.pose.position.x,
+            message.pose.pose.position.y,
+        )
         with self._data_lock:
-            self._latest_odom_yaw = yaw
-            self._latest_odom_position = (
-                message.pose.pose.position.x,
-                message.pose.pose.position.y,
+            discontinuous, translation, yaw_change = (
+                self._odom_discontinuity_detector.update(position, yaw)
             )
+            if (
+                discontinuous
+                and self._automatic_relocalization
+                and not self._run_lock.locked()
+            ):
+                self._pending_odom_jump = (translation, yaw_change)
+            self._latest_odom_yaw = yaw
+            self._latest_odom_position = position
             self._latest_speed_norm = max(
                 abs(message.twist.twist.linear.x),
                 abs(message.twist.twist.linear.y),
@@ -617,25 +637,35 @@ class ActiveGlobalRelocalization(Node):
             if self._automatic_trigger_pending or cooling_down:
                 self._reset_mismatch_detectors()
                 return
-            hard_mismatch = self._mismatch_detector.update(
-                quality.scan_score,
-                quality.beams_used,
-                quality.in_map_fraction,
-                quality.x_variance,
-                quality.y_variance,
-                quality.yaw_variance,
-            )
-            suspect_mismatch = self._suspect_mismatch_detector.update(
-                quality.scan_score,
-                quality.beams_used,
-            )
-            if not hard_mismatch and not suspect_mismatch:
+            odom_jump = self._pending_odom_jump
+            hard_mismatch = False
+            suspect_mismatch = False
+            if odom_jump is None:
+                hard_mismatch = self._mismatch_detector.update(
+                    quality.scan_score,
+                    quality.beams_used,
+                    quality.in_map_fraction,
+                    quality.x_variance,
+                    quality.y_variance,
+                    quality.yaw_variance,
+                )
+                suspect_mismatch = self._suspect_mismatch_detector.update(
+                    quality.scan_score,
+                    quality.beams_used,
+                )
+            if odom_jump is None and not hard_mismatch and not suspect_mismatch:
                 return
-            trigger_reason = (
-                'persistent hard mismatch'
-                if hard_mismatch
-                else 'windowed moderate mismatch'
-            )
+            if odom_jump is not None:
+                trigger_reason = (
+                    'odometry discontinuity '
+                    f'(translation={odom_jump[0]:.2f} m, '
+                    f'yaw={odom_jump[1]:.2f} rad)'
+                )
+                self._pending_odom_jump = None
+            elif hard_mismatch:
+                trigger_reason = 'persistent hard mismatch'
+            else:
+                trigger_reason = 'windowed moderate mismatch'
             self._automatic_trigger_pending = True
 
         thread = threading.Thread(
@@ -659,8 +689,11 @@ class ActiveGlobalRelocalization(Node):
         response = Trigger.Response()
         try:
             self._execute_relocalization(response, trigger_source='automatic')
-            log = self.get_logger().info if response.success else self.get_logger().error
-            log(f'Automatic relocalization result: {response.message}')
+            result = f'Automatic relocalization result: {response.message}'
+            if response.success:
+                self.get_logger().info(result)
+            else:
+                self.get_logger().error(result)
         finally:
             with self._data_lock:
                 self._automatic_trigger_pending = False

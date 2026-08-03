@@ -5,6 +5,7 @@ import pytest
 from wpr_relocalization.relocalization_core import (
     ConsecutiveMismatchDetector,
     LikelihoodField,
+    OdometryDiscontinuityDetector,
     WindowedMismatchDetector,
     normalize_angle,
     quaternion_to_yaw,
@@ -153,3 +154,22 @@ def test_windowed_mismatch_rejects_healthy_window_and_sparse_scans() -> None:
 def test_windowed_mismatch_validates_configuration(arguments) -> None:
     with pytest.raises(ValueError):
         WindowedMismatchDetector(*arguments)
+
+
+def test_odometry_discontinuity_detects_translation_and_rotation_jumps() -> None:
+    detector = OdometryDiscontinuityDetector(0.75, 0.80)
+
+    assert detector.update((0.0, 0.0), 3.0) == (False, 0.0, 0.0)
+    jump, distance, yaw_change = detector.update((0.1, 0.0), -3.0)
+    assert not jump
+    assert distance == pytest.approx(0.1)
+    assert yaw_change == pytest.approx(2.0 * math.pi - 6.0)
+
+    assert detector.update((1.0, 0.0), -3.0)[0]
+    assert detector.update((1.0, 0.0), -1.5)[0]
+
+
+@pytest.mark.parametrize("arguments", [(0.0, 0.5), (0.5, 0.0), (0.5, 3.2)])
+def test_odometry_discontinuity_validates_configuration(arguments) -> None:
+    with pytest.raises(ValueError):
+        OdometryDiscontinuityDetector(*arguments)

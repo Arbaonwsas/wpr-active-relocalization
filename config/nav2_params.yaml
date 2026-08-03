@@ -378,6 +378,10 @@ active_global_relocalization:
     automatic_suspect_score: 0.60
     automatic_suspect_window_scans: 40
     automatic_suspect_required_ratio: 0.90
+    # Gazebo's planar-move plugin exposes model dragging as an impossible odom
+    # jump. This gives continuous drag-and-release testing a deterministic cue.
+    automatic_odom_jump_translation: 0.75
+    automatic_odom_jump_yaw: 0.80
     automatic_trigger_cooldown: 8.0
     translation_distance: 0.55
     translation_speed: 0.24

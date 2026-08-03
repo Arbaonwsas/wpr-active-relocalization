@@ -122,6 +122,47 @@ class WindowedMismatchDetector:
         return True
 
 
+@dataclass
+class OdometryDiscontinuityDetector:
+    """Detect motion between odometry samples that a robot cannot perform."""
+
+    maximum_translation_jump: float
+    maximum_yaw_jump: float
+    previous_position: tuple[float, float] | None = field(
+        default=None, init=False, repr=False
+    )
+    previous_yaw: float | None = field(default=None, init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        if self.maximum_translation_jump <= 0.0:
+            raise ValueError("maximum translation jump must be positive")
+        if not 0.0 < self.maximum_yaw_jump <= math.pi:
+            raise ValueError("maximum yaw jump must be in (0, pi]")
+
+    def update(
+        self,
+        position: tuple[float, float],
+        yaw: float,
+    ) -> tuple[bool, float, float]:
+        previous_position = self.previous_position
+        previous_yaw = self.previous_yaw
+        self.previous_position = position
+        self.previous_yaw = yaw
+        if previous_position is None or previous_yaw is None:
+            return False, 0.0, 0.0
+
+        translation = math.hypot(
+            position[0] - previous_position[0],
+            position[1] - previous_position[1],
+        )
+        yaw_change = abs(normalize_angle(yaw - previous_yaw))
+        discontinuous = (
+            translation > self.maximum_translation_jump
+            or yaw_change > self.maximum_yaw_jump
+        )
+        return discontinuous, translation, yaw_change
+
+
 class LikelihoodField:
     """
     Distance-to-obstacle field used to validate an AMCL pose.
