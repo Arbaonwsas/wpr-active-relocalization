@@ -1,0 +1,5 @@
+requester: making request: std_srvs.srv.Trigger_Request()
+
+response:
+std_srvs.srv.Trigger_Response(success=True, message='stationary quality confirmed; score=0.987, variance=(0.006, 0.004, 0.005)')
+

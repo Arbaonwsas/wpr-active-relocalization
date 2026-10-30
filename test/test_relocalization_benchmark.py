@@ -85,3 +85,18 @@ def test_parse_status_log_ignores_latched_previous_run(tmp_path):
         "PREPARING",
         "SCANNING",
     ]
+
+
+def test_hypothesis_phases_are_counted_without_changing_legacy_table_columns():
+    events = [
+        event(1, 1, 'PREPARING', 0.0, 0.0),
+        event(1, 2, 'SEARCHING_HYPOTHESES', 0.2, 0.2),
+        event(1, 3, 'PLANNING_INFORMATION', 1.0, 1.0),
+        event(1, 4, 'TURNING_FOR_INFORMATION', 1.1, 1.1),
+        event(1, 5, 'FINAL_STOPPING', 3.0, 3.0),
+        event(1, 6, 'FAILED', 3.2, 3.2),
+    ]
+    phases = BENCHMARK.extract_phase_records(events)
+    assert sum(p['duration_wall_sec'] for p in phases) == 3.2
+    assert 'TURNING_FOR_INFORMATION' in BENCHMARK.REPORTED_PHASES
+    assert 'TURNING_FOR_INFORMATION' not in BENCHMARK.RUN_TABLE_PHASES

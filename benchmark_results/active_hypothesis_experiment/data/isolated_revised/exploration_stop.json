@@ -1,0 +1,9 @@
+{
+  "success": false,
+  "message": "Informative turn aborted: stale sensors or navigation",
+  "pause_to_response_sec": 1.507387118996121,
+  "late_nonzero_commands": 0,
+  "late_command_count": 18,
+  "final_speed_norm": 0.0,
+  "passed": true
+}

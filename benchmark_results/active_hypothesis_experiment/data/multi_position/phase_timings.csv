@@ -1,0 +1,97 @@
+location,trial,phase,occurrence,attempt,detail,start_wall_sec,end_wall_sec,duration_wall_sec,start_sim_sec,end_sim_sec,duration_sim_sec
+ambiguous_room,1,PREPARING,1,,canceling navigation and stopping robot,2.6e-05,0.303558,0.303532,0.0,0.3,0.3
+ambiguous_room,1,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.303558,1.036848,0.73329,0.3,1.1,0.8
+ambiguous_room,1,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.036848,1.044076,0.007228,1.1,1.1,0.0
+ambiguous_room,1,PLANNING_INFORMATION,1,,selecting motion by predicted scan disagreement,1.044076,1.044367,0.000291,1.1,1.1,0.0
+ambiguous_room,1,TURNING_FOR_INFORMATION,1,,facing informative direction,1.044367,5.061462,4.017095,1.1,5.1,4.0
+ambiguous_room,1,TRANSLATING,1,,breaking symmetric localization hypotheses,5.061462,10.826009,5.764547,5.1,10.8,5.7
+ambiguous_room,1,COMPARING_HYPOTHESES,2,,checking distinct pose modes,10.826009,10.882358,0.056349,10.8,10.9,0.1
+ambiguous_room,1,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,10.882358,11.142408,0.26005,10.9,11.2,0.3
+ambiguous_room,1,VERIFYING_STATIONARY,1,2,requesting AMCL no-motion quality updates,11.142408,11.245153,0.102745,11.2,11.3,0.1
+ambiguous_room,1,CLEARING_COSTMAPS,1,,clearing after laser candidate,11.245153,11.247487,0.002334,11.3,11.3,0.0
+ambiguous_room,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,11.247487,11.39819,0.150703,11.3,11.4,0.1
+ambiguous_room,2,PREPARING,1,,canceling navigation and stopping robot,2.2e-05,0.302928,0.302906,0.0,0.3,0.3
+ambiguous_room,2,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.302928,1.047026,0.744098,0.3,1.0,0.7
+ambiguous_room,2,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.047026,1.054781,0.007755,1.0,1.0,0.0
+ambiguous_room,2,PLANNING_INFORMATION,1,,selecting motion by predicted scan disagreement,1.054781,1.055058,0.000277,1.0,1.0,0.0
+ambiguous_room,2,TURNING_FOR_INFORMATION,1,,facing informative direction,1.055058,5.072807,4.017749,1.0,5.0,4.0
+ambiguous_room,2,TRANSLATING,1,,breaking symmetric localization hypotheses,5.072807,10.935426,5.862619,5.0,10.9,5.9
+ambiguous_room,2,COMPARING_HYPOTHESES,2,,checking distinct pose modes,10.935426,10.990582,0.055156,10.9,11.0,0.1
+ambiguous_room,2,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,10.990582,11.245694,0.255112,11.0,11.2,0.2
+ambiguous_room,2,VERIFYING_STATIONARY,1,2,requesting AMCL no-motion quality updates,11.245694,11.348273,0.102579,11.2,11.3,0.1
+ambiguous_room,2,CLEARING_COSTMAPS,1,,clearing after laser candidate,11.348273,11.350303,0.00203,11.3,11.3,0.0
+ambiguous_room,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,11.350303,11.500902,0.150599,11.3,11.5,0.2
+ambiguous_room,3,PREPARING,1,,canceling navigation and stopping robot,3.2e-05,0.304587,0.304555,0.0,0.3,0.3
+ambiguous_room,3,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.304587,1.054348,0.749761,0.3,1.0,0.7
+ambiguous_room,3,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.054348,1.061596,0.007248,1.0,1.0,0.0
+ambiguous_room,3,PLANNING_INFORMATION,1,,selecting motion by predicted scan disagreement,1.061596,1.061879,0.000283,1.0,1.0,0.0
+ambiguous_room,3,TURNING_FOR_INFORMATION,1,,facing informative direction,1.061879,5.129819,4.06794,1.0,5.1,4.1
+ambiguous_room,3,TRANSLATING,1,,breaking symmetric localization hypotheses,5.129819,10.99187,5.862051,5.1,11.0,5.9
+ambiguous_room,3,COMPARING_HYPOTHESES,2,,checking distinct pose modes,10.99187,11.045867,0.053997,11.0,11.0,0.0
+ambiguous_room,3,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,11.045867,11.302495,0.256628,11.0,11.3,0.3
+ambiguous_room,3,VERIFYING_STATIONARY,1,2,requesting AMCL no-motion quality updates,11.302495,11.406001,0.103506,11.3,11.4,0.1
+ambiguous_room,3,CLEARING_COSTMAPS,1,,clearing after laser candidate,11.406001,11.408643,0.002642,11.4,11.4,0.0
+ambiguous_room,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,11.408643,11.559308,0.150665,11.4,11.5,0.1
+top_left_room,1,PREPARING,1,,canceling navigation and stopping robot,3.3e-05,0.303965,0.303932,0.0,0.3,0.3
+top_left_room,1,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.303965,1.095209,0.791244,0.3,1.1,0.8
+top_left_room,1,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.095209,1.099221,0.004012,1.1,1.1,0.0
+top_left_room,1,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,1.099221,1.357075,0.257854,1.1,1.3,0.2
+top_left_room,1,VERIFYING_STATIONARY,1,1,requesting AMCL no-motion quality updates,1.357075,1.460083,0.103008,1.3,1.4,0.1
+top_left_room,1,CLEARING_COSTMAPS,1,,clearing after laser candidate,1.460083,1.462579,0.002496,1.4,1.4,0.0
+top_left_room,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,1.462579,1.613244,0.150665,1.4,1.6,0.2
+top_left_room,2,PREPARING,1,,canceling navigation and stopping robot,1.8e-05,0.303329,0.303311,0.0,0.3,0.3
+top_left_room,2,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.303329,1.099508,0.796179,0.3,1.1,0.8
+top_left_room,2,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.099508,1.103671,0.004163,1.1,1.1,0.0
+top_left_room,2,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,1.103671,1.359466,0.255795,1.1,1.4,0.3
+top_left_room,2,VERIFYING_STATIONARY,1,1,requesting AMCL no-motion quality updates,1.359466,1.461934,0.102468,1.4,1.5,0.1
+top_left_room,2,CLEARING_COSTMAPS,1,,clearing after laser candidate,1.461934,1.464001,0.002067,1.5,1.5,0.0
+top_left_room,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,1.464001,1.61474,0.150739,1.5,1.6,0.1
+top_left_room,3,PREPARING,1,,canceling navigation and stopping robot,2.4e-05,0.303716,0.303692,0.0,0.3,0.3
+top_left_room,3,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.303716,1.079526,0.77581,0.3,1.0,0.7
+top_left_room,3,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.079526,1.083541,0.004015,1.0,1.0,0.0
+top_left_room,3,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,1.083541,1.33953,0.255989,1.0,1.3,0.3
+top_left_room,3,VERIFYING_STATIONARY,1,1,requesting AMCL no-motion quality updates,1.33953,1.493202,0.153672,1.3,1.4,0.1
+top_left_room,3,CLEARING_COSTMAPS,1,,clearing after laser candidate,1.493202,1.495945,0.002743,1.4,1.5,0.1
+top_left_room,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,1.495945,1.647897,0.151952,1.5,1.6,0.1
+map_center,1,PREPARING,1,,canceling navigation and stopping robot,2.7e-05,0.304384,0.304357,0.0,0.3,0.3
+map_center,1,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.304384,1.070527,0.766143,0.3,1.1,0.8
+map_center,1,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.070527,1.074455,0.003928,1.1,1.1,0.0
+map_center,1,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,1.074455,1.333864,0.259409,1.1,1.3,0.2
+map_center,1,VERIFYING_STATIONARY,1,1,requesting AMCL no-motion quality updates,1.333864,1.537862,0.203998,1.3,1.6,0.3
+map_center,1,CLEARING_COSTMAPS,1,,clearing after laser candidate,1.537862,1.540507,0.002645,1.6,1.6,0.0
+map_center,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,1.540507,1.691352,0.150845,1.6,1.7,0.1
+map_center,2,PREPARING,1,,canceling navigation and stopping robot,3.2e-05,0.304162,0.30413,0.0,0.3,0.3
+map_center,2,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.304162,1.070263,0.766101,0.3,1.1,0.8
+map_center,2,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.070263,1.075176,0.004913,1.1,1.1,0.0
+map_center,2,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,1.075176,1.332761,0.257585,1.1,1.4,0.3
+map_center,2,VERIFYING_STATIONARY,1,1,requesting AMCL no-motion quality updates,1.332761,1.485327,0.152566,1.4,1.5,0.1
+map_center,2,CLEARING_COSTMAPS,1,,clearing after laser candidate,1.485327,1.487695,0.002368,1.5,1.5,0.0
+map_center,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,1.487695,1.638359,0.150664,1.5,1.7,0.2
+map_center,3,PREPARING,1,,canceling navigation and stopping robot,3e-05,0.304255,0.304225,0.0,0.3,0.3
+map_center,3,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.304255,1.046803,0.742548,0.3,1.0,0.7
+map_center,3,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.046803,1.050717,0.003914,1.0,1.0,0.0
+map_center,3,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,1.050717,1.307989,0.257272,1.0,1.3,0.3
+map_center,3,VERIFYING_STATIONARY,1,1,requesting AMCL no-motion quality updates,1.307989,1.410848,0.102859,1.3,1.4,0.1
+map_center,3,CLEARING_COSTMAPS,1,,clearing after laser candidate,1.410848,1.413233,0.002385,1.4,1.4,0.0
+map_center,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,1.413233,1.564112,0.150879,1.4,1.5,0.1
+bottom_right_area,1,PREPARING,1,,canceling navigation and stopping robot,2.4e-05,0.30333,0.303306,0.0,0.3,0.3
+bottom_right_area,1,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.30333,1.093596,0.790266,0.3,1.1,0.8
+bottom_right_area,1,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.093596,1.097309,0.003713,1.1,1.1,0.0
+bottom_right_area,1,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,1.097309,1.355947,0.258638,1.1,1.3,0.2
+bottom_right_area,1,VERIFYING_STATIONARY,1,1,requesting AMCL no-motion quality updates,1.355947,1.458708,0.102761,1.3,1.4,0.1
+bottom_right_area,1,CLEARING_COSTMAPS,1,,clearing after laser candidate,1.458708,1.461417,0.002709,1.4,1.4,0.0
+bottom_right_area,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,1.461417,1.612812,0.151395,1.4,1.6,0.2
+bottom_right_area,2,PREPARING,1,,canceling navigation and stopping robot,2e-05,0.303404,0.303384,0.0,0.3,0.3
+bottom_right_area,2,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.303404,1.046998,0.743594,0.3,1.0,0.7
+bottom_right_area,2,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.046998,1.050782,0.003784,1.0,1.0,0.0
+bottom_right_area,2,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,1.050782,1.306177,0.255395,1.0,1.3,0.3
+bottom_right_area,2,VERIFYING_STATIONARY,1,1,requesting AMCL no-motion quality updates,1.306177,1.409623,0.103446,1.3,1.4,0.1
+bottom_right_area,2,CLEARING_COSTMAPS,1,,clearing after laser candidate,1.409623,1.412694,0.003071,1.4,1.4,0.0
+bottom_right_area,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,1.412694,1.563457,0.150763,1.4,1.5,0.1
+bottom_right_area,3,PREPARING,1,,canceling navigation and stopping robot,2.2e-05,0.303571,0.303549,0.0,0.3,0.3
+bottom_right_area,3,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.303571,1.01995,0.716379,0.3,1.0,0.7
+bottom_right_area,3,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.01995,1.02572,0.00577,1.0,1.0,0.0
+bottom_right_area,3,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,1.02572,1.284404,0.258684,1.0,1.3,0.3
+bottom_right_area,3,VERIFYING_STATIONARY,1,1,requesting AMCL no-motion quality updates,1.284404,1.387254,0.10285,1.3,1.4,0.1
+bottom_right_area,3,CLEARING_COSTMAPS,1,,clearing after laser candidate,1.387254,1.389296,0.002042,1.4,1.4,0.0
+bottom_right_area,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,1.389296,1.539902,0.150606,1.4,1.5,0.1

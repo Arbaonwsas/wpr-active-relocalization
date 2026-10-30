@@ -182,6 +182,12 @@ if(BUILD_TESTING)
   ament_add_pytest_test(test_relocalization_benchmark
     test/test_relocalization_benchmark.py
   )
+  ament_add_pytest_test(test_relocalization_safety
+    test/test_relocalization_safety.py
+  )
+  ament_add_pytest_test(test_active_hypotheses
+    test/test_active_hypotheses.py
+  )
 endif()
 
 install(DIRECTORY config launch demo_launch worlds models meshes rviz src msg maps

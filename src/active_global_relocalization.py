@@ -7,6 +7,7 @@ import math
 import threading
 import time
 
+from action_msgs.msg import GoalStatus, GoalStatusArray
 from action_msgs.srv import CancelGoal
 from geometry_msgs.msg import PoseWithCovarianceStamped, Twist
 from nav_msgs.msg import OccupancyGrid, Odometry
@@ -27,6 +28,14 @@ from std_msgs.msg import String
 from std_srvs.srv import Empty, Trigger
 from tf2_ros import Buffer, TransformException, TransformListener
 
+from wpr_relocalization.active_hypotheses import (
+    Hypothesis,
+    HypothesisSearch,
+    advance_pose,
+    relative_motion,
+    scan_endpoints,
+    unique_candidate,
+)
 from wpr_relocalization.relocalization_core import (
     ConsecutiveMismatchDetector,
     LikelihoodField,
@@ -66,6 +75,12 @@ class ActiveGlobalRelocalization(Node):
         self.declare_parameter('minimum_rotation_before_success', 1.20)
         self.declare_parameter('control_frequency', 20.0)
         self.declare_parameter('service_timeout', 15.0)
+        self.declare_parameter('sensor_timeout', 0.5)
+        self.declare_parameter('translation_robot_radius', 0.22)
+        self.declare_parameter('active_hypothesis_relocalization', False)
+        self.declare_parameter('hypothesis_score_margin', 0.15)
+        self.declare_parameter('hypothesis_maximum_moves', 3)
+        self.declare_parameter('hypothesis_maximum_travel', 1.8)
         self.declare_parameter('maximum_wall_duration', 360.0)
         self.declare_parameter('motion_stall_timeout', 15.0)
         self.declare_parameter('stop_speed_threshold', 0.01)
@@ -115,6 +130,14 @@ class ActiveGlobalRelocalization(Node):
         )
         self._control_frequency = max(2.0, self._double('control_frequency'))
         self._service_timeout = max(1.0, self._double('service_timeout'))
+        self._sensor_timeout = max(0.1, self._double('sensor_timeout'))
+        self._translation_robot_radius = max(
+            0.0, self._double('translation_robot_radius')
+        )
+        self._active_hypotheses = self._boolean('active_hypothesis_relocalization')
+        self._hypothesis_score_margin = max(0.05, self._double('hypothesis_score_margin'))
+        self._hypothesis_maximum_moves = max(0, self._integer('hypothesis_maximum_moves'))
+        self._hypothesis_maximum_travel = max(0.0, self._double('hypothesis_maximum_travel'))
         self._maximum_wall_duration = max(
             30.0, self._double('maximum_wall_duration')
         )
@@ -208,6 +231,7 @@ class ActiveGlobalRelocalization(Node):
         self._base_frame = self._string('base_frame')
 
         self._map_field: LikelihoodField | None = None
+        self._hypothesis_search: HypothesisSearch | None = None
         self._latest_pose: PoseWithCovarianceStamped | None = None
         self._latest_odom_yaw: float | None = None
         self._latest_odom_position: tuple[float, float] | None = None
@@ -233,6 +257,7 @@ class ActiveGlobalRelocalization(Node):
         self._automatic_failure_latched = False
         self._pending_odom_jump: tuple[float, float] | None = None
         self._last_relocalization_end_wall = 0.0
+        self._navigation_status = {}
 
         status_qos = QoSProfile(depth=1)
         status_qos.reliability = ReliabilityPolicy.RELIABLE
@@ -243,6 +268,9 @@ class ActiveGlobalRelocalization(Node):
 
         self._cmd_pub = self.create_publisher(
             Twist, self._string('cmd_vel_topic'), 10
+        )
+        self._initial_pose_pub = self.create_publisher(
+            PoseWithCovarianceStamped, '/initialpose', 10
         )
         self._status_pub = self.create_publisher(
             String, '/global_relocalization/status', status_qos
@@ -291,11 +319,22 @@ class ActiveGlobalRelocalization(Node):
             '/request_nomotion_update',
             callback_group=self._callback_group,
         )
-        self._cancel_client = self.create_client(
-            CancelGoal,
-            '/navigate_to_pose/_action/cancel_goal',
-            callback_group=self._callback_group,
-        )
+        self._cancel_clients = {}
+        for action_name in ('navigate_to_pose', 'navigate_through_poses'):
+            self._cancel_clients[action_name] = self.create_client(
+                CancelGoal,
+                f'/{action_name}/_action/cancel_goal',
+                callback_group=self._callback_group,
+            )
+            self.create_subscription(
+                GoalStatusArray,
+                f'/{action_name}/_action/status',
+                lambda message, name=action_name: self._on_navigation_status(
+                    name, message
+                ),
+                status_qos,
+                callback_group=self._callback_group,
+            )
         self._clear_global_client = self.create_client(
             ClearEntireCostmap,
             '/global_costmap/clear_entirely_global_costmap',
@@ -344,6 +383,9 @@ class ActiveGlobalRelocalization(Node):
             return
         with self._data_lock:
             self._map_field = field
+            self._hypothesis_search = HypothesisSearch(
+                field, message.data, self._translation_robot_radius
+            )
         self.get_logger().info(
             f'Likelihood field ready: {field.width}x{field.height}'
         )
@@ -573,15 +615,70 @@ class ActiveGlobalRelocalization(Node):
             return None
         return holder.get('response')
 
-    def _cancel_navigation(self) -> None:
-        response = self._call_service(
-            self._cancel_client, CancelGoal.Request(), self._service_timeout
-        )
-        if response is None:
-            self.get_logger().warning(
-                'NavigateToPose cancel service unavailable; continuing after stop command'
+    def _on_navigation_status(self, name, message: GoalStatusArray) -> None:
+        with self._data_lock:
+            self._navigation_status[name] = {
+                bytes(item.goal_info.goal_id.uuid): item.status
+                for item in message.status_list
+            }
+
+    def _navigation_is_active(self) -> bool:
+        active = {
+            GoalStatus.STATUS_ACCEPTED,
+            GoalStatus.STATUS_EXECUTING,
+            GoalStatus.STATUS_CANCELING,
+        }
+        with self._data_lock:
+            return any(
+                status in active
+                for goals in self._navigation_status.values()
+                for status in goals.values()
             )
+
+    def _cancel_navigation(self) -> bool:
+        # Send stop commands before any potentially blocking service discovery.
         self._stop_robot(10)
+        pending = []
+        for name, client in self._cancel_clients.items():
+            response = self._call_service(
+                client, CancelGoal.Request(), self._service_timeout
+            )
+            if response is None or response.return_code != CancelGoal.Response.ERROR_NONE:
+                self.get_logger().error(f'Cannot confirm cancellation of {name}')
+                return False
+            pending.extend(
+                (name, bytes(goal.goal_id.uuid))
+                for goal in response.goals_canceling
+            )
+
+        terminal = {
+            GoalStatus.STATUS_SUCCEEDED,
+            GoalStatus.STATUS_CANCELED,
+            GoalStatus.STATUS_ABORTED,
+        }
+        deadline = time.monotonic() + self._service_timeout
+        while rclpy.ok() and time.monotonic() < deadline:
+            with self._data_lock:
+                finished = all(
+                    self._navigation_status.get(name, {}).get(goal_id) in terminal
+                    for name, goal_id in pending
+                )
+            if finished and not self._navigation_is_active():
+                return True
+            self._cmd_pub.publish(Twist())
+            time.sleep(1.0 / self._control_frequency)
+        return False
+
+    def _motion_inputs_ready(self) -> bool:
+        now = time.monotonic()
+        with self._data_lock:
+            fresh = (
+                self._latest_scan is not None
+                and self._latest_odom_position is not None
+                and now - self._latest_scan_wall_time <= self._sensor_timeout
+                and now - self._latest_odom_wall_time <= self._sensor_timeout
+            )
+        return fresh and not self._navigation_is_active()
 
     def _clear_costmaps(self) -> None:
         for client in (self._clear_global_client, self._clear_local_client):
@@ -627,8 +724,10 @@ class ActiveGlobalRelocalization(Node):
                 missing.append('/map')
             if self._latest_odom_yaw is None:
                 missing.append('/odom')
-            if time.monotonic() - self._latest_scan_wall_time > 5.0:
+            if time.monotonic() - self._latest_scan_wall_time > self._sensor_timeout:
                 missing.append('/scan')
+            if time.monotonic() - self._latest_odom_wall_time > self._sensor_timeout:
+                missing.append('fresh /odom')
             if self._laser_transform is None:
                 missing.append('laser TF')
         if missing:
@@ -839,23 +938,52 @@ class ActiveGlobalRelocalization(Node):
         return False, 'stationary quality confirmation timed out'
 
     def _sector_clearance(self, scan: LaserScan, center: float) -> float:
-        samples = []
+        # Check every endpoint in the swept footprint, including thin obstacles
+        # and points outside the forward angular sector. The sector only proves
+        # that the sensor actually observes the intended direction.
+        transform = self._laser_transform
+        if transform is None:
+            return 0.0
+        lx, ly, laser_yaw = transform
+        direction = center + laser_yaw
+        cos_dir, sin_dir = math.cos(direction), math.sin(direction)
+        clearance = min(scan.range_max, self._score_maximum_range)
+        observed = False
         for index, measured_range in enumerate(scan.ranges):
             angle = scan.angle_min + index * scan.angle_increment
-            if abs(normalize_angle(angle - center)) > self._translation_sector_half_angle:
+            in_sector = (
+                abs(normalize_angle(angle - center))
+                <= self._translation_sector_half_angle
+            )
+            if math.isinf(measured_range) and measured_range > 0:
+                observed = observed or in_sector
                 continue
-            if math.isinf(measured_range) and measured_range > 0.0:
-                samples.append(min(scan.range_max, self._score_maximum_range))
-            elif math.isfinite(measured_range) and measured_range >= scan.range_min:
-                samples.append(float(measured_range))
-        if not samples:
-            return 0.0
-        samples.sort()
-        percentile_index = min(len(samples) - 1, int(0.20 * len(samples)))
-        return samples[percentile_index]
+            if not math.isfinite(measured_range) or measured_range < scan.range_min:
+                if in_sector:
+                    return 0.0
+                continue
+            if measured_range > scan.range_max:
+                if in_sector:
+                    return 0.0
+                continue
+            observed = observed or in_sector
+            x = lx + measured_range * math.cos(angle + laser_yaw)
+            y = ly + measured_range * math.sin(angle + laser_yaw)
+            along = x * cos_dir + y * sin_dir
+            lateral = abs(-x * sin_dir + y * cos_dir)
+            radius = self._translation_robot_radius
+            if lateral <= radius:
+                half_chord = math.sqrt(max(0.0, radius * radius - lateral * lateral))
+                if along + half_chord >= 0.0:
+                    clearance = min(clearance, max(0.0, along - half_chord))
+        return clearance if observed else 0.0
 
-    def _translate_for_disambiguation(self, global_deadline: float) -> bool:
-        if self._translation_distance <= 0.0:
+    def _translate_for_disambiguation(
+        self, global_deadline: float, distance: float | None = None,
+        fixed_direction: float | None = None,
+    ) -> bool:
+        target_distance = self._translation_distance if distance is None else distance
+        if target_distance <= 0.0:
             return False
         with self._data_lock:
             scan = self._latest_scan
@@ -870,8 +998,11 @@ class ActiveGlobalRelocalization(Node):
         rear_center = math.pi - laser_yaw
         front = self._sector_clearance(scan, front_center)
         rear = self._sector_clearance(scan, rear_center)
-        required = self._translation_distance + self._translation_clearance
-        if max(front, rear) < required:
+        required = target_distance + self._translation_clearance
+        available = max(front, rear) if fixed_direction is None else (
+            front if fixed_direction > 0 else rear
+        )
+        if available < required:
             self._publish_status(
                 'TRANSLATION_SKIPPED',
                 'insufficient local clearance',
@@ -881,12 +1012,14 @@ class ActiveGlobalRelocalization(Node):
             )
             return False
 
-        direction = 1.0 if front >= rear else -1.0
+        direction = fixed_direction if fixed_direction is not None else (
+            1.0 if front >= rear else -1.0
+        )
         self._publish_status(
             'TRANSLATING',
             'breaking symmetric localization hypotheses',
             direction='forward' if direction > 0.0 else 'backward',
-            distance=self._translation_distance,
+            distance=target_distance,
             front_clearance=round(front, 2),
             rear_clearance=round(rear, 2),
         )
@@ -894,6 +1027,9 @@ class ActiveGlobalRelocalization(Node):
         last_motion_time = time.monotonic()
         previous_distance = 0.0
         while rclpy.ok() and time.monotonic() < global_deadline:
+            if not self._motion_inputs_ready():
+                self._stop_robot(20)
+                raise RuntimeError('Motion aborted: stale sensors or active navigation')
             with self._data_lock:
                 position = self._latest_odom_position
                 current_scan = self._latest_scan
@@ -901,7 +1037,7 @@ class ActiveGlobalRelocalization(Node):
                 self._stop_robot(10)
                 return False
             distance = math.hypot(position[0] - start[0], position[1] - start[1])
-            if distance >= self._translation_distance:
+            if distance >= target_distance:
                 self._stop_robot(20)
                 return True
             if distance > previous_distance + 1.0e-4:
@@ -929,6 +1065,182 @@ class ActiveGlobalRelocalization(Node):
             time.sleep(period)
         self._stop_robot(20)
         return False
+
+    def _hypothesis_snapshot(self, deadline, previous_scan=None):
+        while rclpy.ok() and time.monotonic() < deadline:
+            if not self._motion_inputs_ready():
+                raise RuntimeError('Hypothesis recovery aborted: stale sensors or navigation')
+            with self._data_lock:
+                scan = self._latest_scan
+                odom = (*self._latest_odom_position, self._latest_odom_yaw)
+                laser = self._laser_transform
+            if scan is not previous_scan and laser is not None:
+                return scan, odom, scan_endpoints(scan, laser)
+            time.sleep(1.0 / self._control_frequency)
+        raise RuntimeError('Hypothesis recovery timed out waiting for a fresh scan')
+
+    def _turn_for_information(self, heading, deadline):
+        if abs(heading) < 0.03:
+            return True
+        sign = 1.0 if heading > 0 else -1.0
+        with self._data_lock:
+            previous_yaw = self._latest_odom_yaw
+        progress = 0.0
+        last_motion = time.monotonic()
+        self._publish_status('TURNING_FOR_INFORMATION', 'facing informative direction',
+                             heading=heading)
+        while rclpy.ok() and time.monotonic() < deadline:
+            if not self._motion_inputs_ready():
+                raise RuntimeError('Informative turn aborted: stale sensors or navigation')
+            with self._data_lock:
+                yaw = self._latest_odom_yaw
+            delta = sign * normalize_angle(yaw - previous_yaw)
+            previous_yaw = yaw
+            progress += delta
+            if delta > 0.0001:
+                last_motion = time.monotonic()
+            remaining = abs(heading) - progress
+            if remaining <= 0.03:
+                self._stop_robot(20)
+                return True
+            if time.monotonic() - last_motion > self._motion_stall_timeout:
+                raise RuntimeError('Informative turn stalled')
+            command = Twist()
+            # The simulated planar base barely responds below 0.35 rad/s.
+            # Keep a useful command down to the angle tolerance, then stop via
+            # the velocity smoother rather than spending seconds creeping.
+            command.angular.z = sign * min(self._angular_speed, max(0.5, 2 * remaining))
+            self._cmd_pub.publish(command)
+            time.sleep(1.0 / self._control_frequency)
+        self._stop_robot(20)
+        return False
+
+    def _resolve_hypotheses(self, deadline):
+        with self._data_lock:
+            search = self._hypothesis_search
+            laser = self._laser_transform
+        if search is None:
+            return False, 'hypothesis map unavailable'
+        self._stop_robot(10)
+        scan, previous_odom, endpoints = self._hypothesis_snapshot(deadline)
+        self._publish_status('SEARCHING_HYPOTHESES', 'global laser-only candidate search')
+        candidates = search.global_candidates(endpoints)
+        if len(candidates) < 2:
+            return False, 'insufficient global pose candidates'
+        totals = [h.score for h in candidates]
+        observations = 1
+        travel = 0.0
+        for move in range(self._hypothesis_maximum_moves + 1):
+            if time.monotonic() >= deadline:
+                return False, 'hypothesis recovery time budget exhausted'
+            means = [value / observations for value in totals]
+            winner = unique_candidate(candidates, means, self._hypothesis_score_margin)
+            self._publish_status(
+                'COMPARING_HYPOTHESES', 'checking distinct pose modes',
+                move=move, observations=observations, travel=travel,
+                hypotheses=[{'pose': h.pose, 'score': h.score, 'mean_score': mean}
+                            for h, mean in zip(candidates, means)],
+            )
+            if winner is not None:
+                # A second fresh scan must independently preserve the winner.
+                fresh, current_odom, points = self._hypothesis_snapshot(deadline, scan)
+                delta = relative_motion(previous_odom, current_odom)
+                verified = []
+                for h in candidates:
+                    predicted = Hypothesis(*advance_pose(h.pose, delta), h.score)
+                    refined = search.refine([predicted], points, 0.05, 0.04)
+                    verified.append(refined[0] if refined else Hypothesis(
+                        *predicted.pose, 0.0))
+                totals = [old + h.score for old, h in zip(totals, verified)]
+                observations += 1
+                candidates = verified
+                scan, previous_odom = fresh, current_odom
+                means = [value / observations for value in totals]
+                if unique_candidate(candidates, means, self._hypothesis_score_margin) == winner:
+                    message = PoseWithCovarianceStamped()
+                    message.header.frame_id = 'map'
+                    message.header.stamp = self.get_clock().now().to_msg()
+                    chosen = candidates[winner]
+                    message.pose.pose.position.x = chosen.x
+                    message.pose.pose.position.y = chosen.y
+                    message.pose.pose.orientation.z = math.sin(chosen.yaw / 2)
+                    message.pose.pose.orientation.w = math.cos(chosen.yaw / 2)
+                    message.pose.covariance[0] = 0.01
+                    message.pose.covariance[7] = 0.01
+                    message.pose.covariance[35] = 0.01
+                    self._publish_status(
+                        'SEEDING_AMCL', 'distinct laser candidate initializes AMCL',
+                        candidate_pose=chosen.pose, score=chosen.score,
+                    )
+                    with self._data_lock:
+                        pose_epoch = self._pose_sequence
+                    self._initial_pose_pub.publish(message)
+                    # Wait for AMCL to consume the prior before requesting its
+                    # stationary updates. No simulation position enters the prior.
+                    seed_deadline = min(deadline, time.monotonic() + 5.0)
+                    updated = False
+                    while rclpy.ok() and time.monotonic() < seed_deadline:
+                        if not self._motion_inputs_ready():
+                            return False, 'sensor or navigation change during AMCL handoff'
+                        self._call_service(self._nomotion_update_client, Empty.Request(), 1.0)
+                        with self._data_lock:
+                            updated = self._pose_sequence > pose_epoch
+                        if updated:
+                            break
+                        time.sleep(0.05)
+                    if not updated:
+                        return False, 'AMCL did not acknowledge the laser candidate'
+                    self._stop_robot(10)
+                    confirmed, detail = self._confirm_stationary_quality(move + 1, deadline)
+                    with self._data_lock:
+                        pose = self._latest_pose.pose.pose
+                    q = pose.orientation
+                    yaw = quaternion_to_yaw(q.x, q.y, q.z, q.w)
+                    if (math.hypot(pose.position.x - chosen.x, pose.position.y - chosen.y) > 0.3
+                            or abs(normalize_angle(yaw - chosen.yaw)) > 0.2):
+                        return False, 'AMCL diverged from the selected laser candidate'
+                    return confirmed, detail
+
+            if move >= self._hypothesis_maximum_moves:
+                break
+            remaining_travel = self._hypothesis_maximum_travel - travel
+            with self._data_lock:
+                live_scan = self._latest_scan
+            actions = []
+            for heading in (0.0, math.pi / 4, -math.pi / 4,
+                            math.pi / 2, -math.pi / 2, math.pi):
+                clearance = self._sector_clearance(live_scan, heading - laser[2])
+                for distance in (0.35, 0.65, 0.90):
+                    if (distance <= remaining_travel
+                            and clearance >= distance + self._translation_clearance):
+                        actions.append((heading, distance))
+            best_mean = max(means)
+            competing = [h for h, mean in zip(candidates, means)
+                         if mean >= best_mean - 0.18][:3]
+            action = search.choose_action(competing, actions, laser)
+            if action is None:
+                return False, 'pose ambiguity remains; no safe informative action available'
+            self._publish_status(
+                'PLANNING_INFORMATION', 'selecting motion by predicted scan disagreement',
+                heading=action.heading, distance=action.distance, gain=action.gain,
+            )
+            if not self._turn_for_information(action.heading, deadline):
+                return False, 'informative turn timed out'
+            if not self._translate_for_disambiguation(deadline, action.distance, 1.0):
+                return False, 'informative translation blocked or incomplete'
+            fresh, current_odom, points = self._hypothesis_snapshot(deadline, scan)
+            delta = relative_motion(previous_odom, current_odom)
+            travel += math.hypot(delta[0], delta[1])
+            updated = []
+            for h in candidates:
+                predicted = Hypothesis(*advance_pose(h.pose, delta), h.score)
+                refined = search.refine([predicted], points)
+                updated.append(refined[0] if refined else Hypothesis(*predicted.pose, 0.0))
+            candidates = updated
+            totals = [old + h.score for old, h in zip(totals, candidates)]
+            observations += 1
+            scan, previous_odom = fresh, current_odom
+        return False, 'pose ambiguity remains after bounded informative exploration'
 
     def _run_attempt(
         self,
@@ -971,6 +1283,9 @@ class ActiveGlobalRelocalization(Node):
         last_report_rotation = 0.0
 
         while rclpy.ok() and time.monotonic() < global_deadline:
+            if not self._motion_inputs_ready():
+                self._stop_robot(20)
+                raise RuntimeError('Motion aborted: stale sensors or active navigation')
             command = Twist()
             command.angular.z = direction * self._angular_speed
             self._cmd_pub.publish(command)
@@ -1081,8 +1396,21 @@ class ActiveGlobalRelocalization(Node):
                 'canceling navigation and stopping robot',
                 trigger_source=trigger_source,
             )
-            self._cancel_navigation()
+            if not self._cancel_navigation():
+                response.success = False
+                response.message = 'Navigation cancellation could not be confirmed'
+                final_detail = response.message
+                return response
             deadline = time.monotonic() + self._maximum_wall_duration
+            if self._active_hypotheses:
+                success, detail = self._resolve_hypotheses(deadline)
+                response.success, response.message = success, detail
+                final_state = 'SUCCEEDED' if success else 'FAILED'
+                final_detail = detail
+                if success:
+                    self._publish_status('CLEARING_COSTMAPS', 'clearing after laser candidate')
+                    self._clear_costmaps()
+                return response
             last_detail = 'no attempt executed'
             for attempt in range(1, self._attempts + 1):
                 direction = 1.0 if attempt % 2 else -1.0

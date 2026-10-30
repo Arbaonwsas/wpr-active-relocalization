@@ -358,6 +358,15 @@ active_global_relocalization:
     minimum_rotation_before_success: 1.20
     control_frequency: 20.0
     service_timeout: 15.0
+    sensor_timeout: 0.5
+    # Match the circular footprint used by both Nav2 costmaps.
+    translation_robot_radius: 0.22
+    # Opt-in laser-only global search and bounded information-seeking motion.
+    # Keep experimental until broad random-pose validation is complete.
+    active_hypothesis_relocalization: False
+    hypothesis_score_margin: 0.15
+    hypothesis_maximum_moves: 3
+    hypothesis_maximum_travel: 1.8
     maximum_wall_duration: 360.0
     motion_stall_timeout: 15.0
     # Stop phases return early only after fresh odometry reports a stationary

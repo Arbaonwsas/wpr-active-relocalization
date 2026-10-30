@@ -19,14 +19,15 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    
+
     launch_file_dir = os.path.join(get_package_share_directory('wpr_simulation2'), 'launch')
 
     home_cmd = IncludeLaunchDescription(
@@ -46,7 +47,7 @@ def generate_launch_description():
         'maps',
         'map.yaml'
     )
-    
+
     nav_param_file = os.path.join(
         get_package_share_directory('wpr_simulation2'),
         'config',
@@ -54,7 +55,7 @@ def generate_launch_description():
     )
 
     nav2_launch_dir = os.path.join(
-        get_package_share_directory('nav2_bringup'), 
+        get_package_share_directory('nav2_bringup'),
         'launch'
     )
 
@@ -78,10 +79,29 @@ def generate_launch_description():
         executable='active_global_relocalization.py',
         name='active_global_relocalization',
         output='screen',
-        parameters=[nav_param_file, {'use_sim_time': use_sim_time}],
+        parameters=[nav_param_file, {
+            'use_sim_time': ParameterValue(use_sim_time, value_type=bool),
+            'active_hypothesis_relocalization': ParameterValue(
+                LaunchConfiguration('active_hypothesis_relocalization'), value_type=bool),
+            'automatic_relocalization': ParameterValue(
+                LaunchConfiguration('automatic_relocalization'), value_type=bool),
+            'simulation_odom_validation': ParameterValue(
+                LaunchConfiguration('simulation_odom_validation'), value_type=bool),
+        }],
     )
 
-    ld = LaunchDescription()
+    ld = LaunchDescription([
+        DeclareLaunchArgument('use_sim_time', default_value='true'),
+        DeclareLaunchArgument(
+            'active_hypothesis_relocalization', default_value='false',
+            description='Enable experimental multi-hypothesis active disambiguation'),
+        DeclareLaunchArgument(
+            'automatic_relocalization', default_value='true',
+            description='Automatically trigger recovery on localization mismatch'),
+        DeclareLaunchArgument(
+            'simulation_odom_validation', default_value='true',
+            description='Gazebo-only truth guard; disable for algorithm-only evaluation'),
+    ])
 
     # Add the commands to the launch description
     ld.add_action(home_cmd)

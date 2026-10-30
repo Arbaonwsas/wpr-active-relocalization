@@ -1,0 +1,18 @@
+{"schema_version": 2, "run_id": 11, "event_index": 8, "state": "SUCCEEDED", "detail": "stationary quality confirmed; score=0.992, variance=(0.006, 0.004, 0.005)", "wall_elapsed_sec": 1.563457, "sim_elapsed_sec": 1.5, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---
+{"schema_version": 2, "run_id": 12, "event_index": 1, "state": "PREPARING", "detail": "canceling navigation and stopping robot", "wall_elapsed_sec": 2.2e-05, "sim_elapsed_sec": 0.0, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0, "trigger_source": "manual"}
+---
+{"schema_version": 2, "run_id": 12, "event_index": 2, "state": "SEARCHING_HYPOTHESES", "detail": "global laser-only candidate search", "wall_elapsed_sec": 0.303571, "sim_elapsed_sec": 0.3, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---
+{"schema_version": 2, "run_id": 12, "event_index": 3, "state": "COMPARING_HYPOTHESES", "detail": "checking distinct pose modes", "wall_elapsed_sec": 1.01995, "sim_elapsed_sec": 1.0, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0, "move": 0, "observations": 1, "travel": 0.0, "hypotheses": [{"pose": [3.500000140443444, -1.4899999608844519, -2.0943951023931966], "score": 0.9926886338166633, "mean_score": 0.9926886338166633}, {"pose": [-3.349999960884452, 1.4100000808387994, 1.047197551196593], "score": 0.7174904675434636, "mean_score": 0.7174904675434636}, {"pose": [2.0500001195818185, -2.414999975785613, 2.5979938779914877], "score": 0.6755482148983647, "mean_score": 0.6755482148983647}, {"pose": [3.500000140443444, 0.3850000659376382, -2.1143951023931966], "score": 0.6725417418531544, "mean_score": 0.6725417418531544}, {"pose": [-2.3999999459832906, 3.0100001046806573, -2.0943951023931966], "score": 0.671155399749315, "mean_score": 0.671155399749315}, {"pose": [2.550000128522515, 0.48500006891787045, 1.007197551196593], "score": 0.6676560402793188, "mean_score": 0.6676560402793188}, {"pose": [3.0250001315027473, -1.4899999608844519, -2.0743951023931966], "score": 0.6575236195722086, "mean_score": 0.6575236195722086}, {"pose": [4.150000152364373, -1.414999960884452, 0.9999310885968766], "score": 0.6500250517463276, "mean_score": 0.6500250517463276}]}
+---
+{"schema_version": 2, "run_id": 12, "event_index": 4, "state": "SEEDING_AMCL", "detail": "distinct laser candidate initializes AMCL", "wall_elapsed_sec": 1.02572, "sim_elapsed_sec": 1.0, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0, "candidate_pose": [3.50000014035183, -1.4899999607699776, -2.0943951016663584], "score": 0.9920700415452}
+---
+{"schema_version": 2, "run_id": 12, "event_index": 5, "state": "VERIFYING_STATIONARY", "detail": "requesting AMCL no-motion quality updates", "wall_elapsed_sec": 1.284404, "sim_elapsed_sec": 1.3, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0, "attempt": 1, "required_good_scans": 2}
+---
+{"schema_version": 2, "run_id": 12, "event_index": 6, "state": "CLEARING_COSTMAPS", "detail": "clearing after laser candidate", "wall_elapsed_sec": 1.387254, "sim_elapsed_sec": 1.4, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---
+{"schema_version": 2, "run_id": 12, "event_index": 7, "state": "FINAL_STOPPING", "detail": "publishing final zero-velocity commands", "wall_elapsed_sec": 1.389296, "sim_elapsed_sec": 1.4, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---
+{"schema_version": 2, "run_id": 12, "event_index": 8, "state": "SUCCEEDED", "detail": "stationary quality confirmed; score=0.992, variance=(0.006, 0.005, 0.005)", "wall_elapsed_sec": 1.539902, "sim_elapsed_sec": 1.5, "phase_wall_sec": 0.0, "phase_sim_sec": 0.0}
+---

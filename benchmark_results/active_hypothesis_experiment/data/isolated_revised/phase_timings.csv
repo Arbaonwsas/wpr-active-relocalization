@@ -1,0 +1,34 @@
+location,trial,phase,occurrence,attempt,detail,start_wall_sec,end_wall_sec,duration_wall_sec,start_sim_sec,end_sim_sec,duration_sim_sec
+isolated_ambiguous_room,1,PREPARING,1,,canceling navigation and stopping robot,3.3e-05,0.304349,0.304316,0.0,0.3,0.3
+isolated_ambiguous_room,1,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.304349,1.017132,0.712783,0.3,1.0,0.7
+isolated_ambiguous_room,1,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.017132,1.024692,0.00756,1.0,1.0,0.0
+isolated_ambiguous_room,1,PLANNING_INFORMATION,1,,selecting motion by predicted scan disagreement,1.024692,1.025008,0.000316,1.0,1.0,0.0
+isolated_ambiguous_room,1,TURNING_FOR_INFORMATION,1,,facing informative direction,1.025008,4.992731,3.967723,1.0,5.0,4.0
+isolated_ambiguous_room,1,TRANSLATING,1,,breaking symmetric localization hypotheses,4.992731,10.862344,5.869613,5.0,10.8,5.8
+isolated_ambiguous_room,1,COMPARING_HYPOTHESES,2,,checking distinct pose modes,10.862344,10.866107,0.003763,10.8,10.8,0.0
+isolated_ambiguous_room,1,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,10.866107,11.121512,0.255405,10.8,11.1,0.3
+isolated_ambiguous_room,1,VERIFYING_STATIONARY,1,2,requesting AMCL no-motion quality updates,11.121512,11.22414,0.102628,11.1,11.2,0.1
+isolated_ambiguous_room,1,CLEARING_COSTMAPS,1,,clearing after laser candidate,11.22414,11.227387,0.003247,11.2,11.2,0.0
+isolated_ambiguous_room,1,FINAL_STOPPING,1,,publishing final zero-velocity commands,11.227387,11.378102,0.150715,11.2,11.3,0.1
+isolated_ambiguous_room,2,PREPARING,1,,canceling navigation and stopping robot,2.4e-05,0.303778,0.303754,0.0,0.3,0.3
+isolated_ambiguous_room,2,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.303778,1.057799,0.754021,0.3,1.0,0.7
+isolated_ambiguous_room,2,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.057799,1.065537,0.007738,1.0,1.0,0.0
+isolated_ambiguous_room,2,PLANNING_INFORMATION,1,,selecting motion by predicted scan disagreement,1.065537,1.065867,0.00033,1.0,1.0,0.0
+isolated_ambiguous_room,2,TURNING_FOR_INFORMATION,1,,facing informative direction,1.065867,4.984058,3.918191,1.0,5.0,4.0
+isolated_ambiguous_room,2,TRANSLATING,1,,breaking symmetric localization hypotheses,4.984058,10.849798,5.86574,5.0,10.8,5.8
+isolated_ambiguous_room,2,COMPARING_HYPOTHESES,2,,checking distinct pose modes,10.849798,10.8535,0.003702,10.8,10.8,0.0
+isolated_ambiguous_room,2,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,10.8535,11.109806,0.256306,10.8,11.1,0.3
+isolated_ambiguous_room,2,VERIFYING_STATIONARY,1,2,requesting AMCL no-motion quality updates,11.109806,11.212547,0.102741,11.1,11.2,0.1
+isolated_ambiguous_room,2,CLEARING_COSTMAPS,1,,clearing after laser candidate,11.212547,11.215055,0.002508,11.2,11.2,0.0
+isolated_ambiguous_room,2,FINAL_STOPPING,1,,publishing final zero-velocity commands,11.215055,11.365843,0.150788,11.2,11.3,0.1
+isolated_ambiguous_room,3,PREPARING,1,,canceling navigation and stopping robot,3.4e-05,0.303977,0.303943,0.0,0.3,0.3
+isolated_ambiguous_room,3,SEARCHING_HYPOTHESES,1,,global laser-only candidate search,0.303977,1.049503,0.745526,0.3,1.0,0.7
+isolated_ambiguous_room,3,COMPARING_HYPOTHESES,1,,checking distinct pose modes,1.049503,1.057115,0.007612,1.0,1.0,0.0
+isolated_ambiguous_room,3,PLANNING_INFORMATION,1,,selecting motion by predicted scan disagreement,1.057115,1.057419,0.000304,1.0,1.0,0.0
+isolated_ambiguous_room,3,TURNING_FOR_INFORMATION,1,,facing informative direction,1.057419,5.023398,3.965979,1.0,5.0,4.0
+isolated_ambiguous_room,3,TRANSLATING,1,,breaking symmetric localization hypotheses,5.023398,10.892106,5.868708,5.0,10.9,5.9
+isolated_ambiguous_room,3,COMPARING_HYPOTHESES,2,,checking distinct pose modes,10.892106,10.947606,0.0555,10.9,10.9,0.0
+isolated_ambiguous_room,3,SEEDING_AMCL,1,,distinct laser candidate initializes AMCL,10.947606,11.203694,0.256088,10.9,11.2,0.3
+isolated_ambiguous_room,3,VERIFYING_STATIONARY,1,2,requesting AMCL no-motion quality updates,11.203694,11.356422,0.152728,11.2,11.3,0.1
+isolated_ambiguous_room,3,CLEARING_COSTMAPS,1,,clearing after laser candidate,11.356422,11.358768,0.002346,11.3,11.3,0.0
+isolated_ambiguous_room,3,FINAL_STOPPING,1,,publishing final zero-velocity commands,11.358768,11.509511,0.150743,11.3,11.5,0.2

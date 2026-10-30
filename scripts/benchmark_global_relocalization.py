@@ -21,6 +21,10 @@ TEST_POSES = (
 )
 
 TERMINAL_STATES = {"SUCCEEDED", "FAILED"}
+HYPOTHESIS_PHASES = (
+    "SEARCHING_HYPOTHESES", "COMPARING_HYPOTHESES", "PLANNING_INFORMATION",
+    "TURNING_FOR_INFORMATION", "SEEDING_AMCL",
+)
 REPORTED_PHASES = (
     "PREPARING",
     "INITIALIZING",
@@ -32,10 +36,10 @@ REPORTED_PHASES = (
     "VERIFYING_STATIONARY",
     "CLEARING_COSTMAPS",
     "FINAL_STOPPING",
-)
+) + HYPOTHESIS_PHASES
 RUN_TABLE_PHASES = tuple(
     state for state in REPORTED_PHASES
-    if state != "TRANSLATION_SKIPPED"
+    if state != "TRANSLATION_SKIPPED" and state not in HYPOTHESIS_PHASES
 )
 
 
@@ -588,6 +592,9 @@ def benchmark_case(
     translation_used = any(
         event.get("state") == "TRANSLATING" for event in events
     )
+    informative_moves = sum(
+        event.get("state") == "PLANNING_INFORMATION" for event in events
+    )
     success_match = re.search(r"success=(True|False)", response.stdout)
     message_match = re.search(
         r"message='(.*?)'\)",
@@ -636,6 +643,7 @@ def benchmark_case(
         "sim_sec": f"{sim_end - sim_start:.3f}",
         "attempts": attempts,
         "translation_used": translation_used,
+        "informative_moves": informative_moves,
         "odom_x": f"{float(odom_position['x']):.6f}",
         "odom_y": f"{float(odom_position['y']):.6f}",
         "odom_yaw": f"{odom_yaw:.6f}",
